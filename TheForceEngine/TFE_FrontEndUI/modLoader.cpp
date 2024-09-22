@@ -25,6 +25,10 @@
 #include <map>
 #include <algorithm>
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 using namespace TFE_Input;
 
 namespace TFE_FrontEndUI
@@ -75,6 +79,8 @@ namespace TFE_FrontEndUI
 	static size_t s_filterLen = 0;
 	static bool s_filterUpdated = false;
 	static bool s_modsRead = false;
+	char programDirModDir[TFE_MAX_PATH];
+
 
 	void fixupName(char* name);
 	void readFromQueue(size_t itemsPerFrame);
@@ -119,7 +125,7 @@ namespace TFE_FrontEndUI
 		sprintf(programDataModDir, "%sMods/", programData);
 		TFE_Paths::fixupPathAsDirectory(programDataModDir);
 
-		char programDirModDir[TFE_MAX_PATH];
+
 		sprintf(programDirModDir, "%sMods/", programDir);
 		TFE_Paths::fixupPathAsDirectory(programDirModDir);
 
@@ -453,6 +459,16 @@ namespace TFE_FrontEndUI
 			s_modsRead = false;
 			modLoader_read();
 		}
+
+		// Windows only - open up explorer to the mod directory. 
+		// Skip Linux for now as you may be launching without UI. 
+		#ifdef _WIN32
+		ImGui::SameLine(730.0f * uiScale);
+		if (ImGui::Button("Open TFE Mod Folder"))
+		{
+			ShellExecute(NULL, "open", programDirModDir, NULL, NULL, SW_SHOWNORMAL);
+		}
+		#endif	
 		
 		ImGui::Separator();
 
