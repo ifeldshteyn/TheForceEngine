@@ -91,7 +91,7 @@ namespace TFE_FrontEndUI
 	void modLoader_read()
 	{
 		// Reuse the cached mods unless no mods have been read yet.
-		if (s_modsRead and s_mods.size() > 0) { return; }
+		if (s_modsRead && s_mods.size() > 0) { return; }
 		s_modsRead = true;
 
 		s_mods.clear();
