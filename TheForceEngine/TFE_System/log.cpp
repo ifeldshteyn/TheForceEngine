@@ -70,8 +70,11 @@ namespace TFE_System
 		auto now = std::chrono::system_clock::now();
 		std::time_t now_c = std::chrono::system_clock::to_time_t(now);
 		std::tm now_tm;
+#ifdef _WIN32
 		localtime_s(&now_tm, &now_c);  // For thread safety on Windows
-
+#else
+		localtime_r(&now_c, &now_tm);  // For thread safety on Linux
+#endif
 		char timeStr[32];
 		strftime(timeStr, sizeof(timeStr), "%Y-%b-%d %H:%M:%S", &now_tm);
 
