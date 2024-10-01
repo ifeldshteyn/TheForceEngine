@@ -807,7 +807,7 @@ namespace TFE_FrontEndUI
 					ShellExecute(NULL, "open", programDirModDir, NULL, NULL, SW_SHOWNORMAL);
 				#else
 				    string xdg_string = "xdg-open " + std::string(programDirModDir);
-					system(xdg_string);
+					system(xdg_string.c_str());
 				#endif
 			}
 			
