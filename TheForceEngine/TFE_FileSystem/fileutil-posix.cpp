@@ -15,6 +15,7 @@
 #include "curl/curl.h"
 #include <sys/stat.h>  // For mkdir
 #include <sys/types.h> // For mode_t
+#include <fstream>
 
 
 // implement TFE FileUtil for Linux and compatibles.
