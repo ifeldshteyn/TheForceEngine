@@ -131,8 +131,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProjectDir);$(ProjectDir)\TFE_ForceScript\Angelscript\angelscript\include;$(ProjectDir)\TFE_ForceScript\Angelscript\add_on;$(ProjectDir)\sdl2_win32\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)\sdl2_win32\lib\x64;$(ProjectDir)\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir);$(ProjectDir)\TFE_ForceScript\Angelscript\angelscript\include;$(ProjectDir)\TFE_ForceScript\Angelscript\add_on;$(ProjectDir)\sdl2_win32\include;C:\Users\Karjala\source\repos\curl\builds\libcurl-vc-x86-release-static-ipv6-sspi-schannel-obj-curl;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\sdl2_win32\lib\x64;$(ProjectDir)\lib;C:\Users\Karjala\source\repos\curl\builds\libcurl-vc-x86-release-static-ipv6-sspi-schannel-obj-lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -178,14 +178,14 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS;GLEW_STATIC;BUILD_SYSMIDI;WIN32_OPENGL;__WINDOWS_MM__;ASMJIT_EMBED;ASMJIT_STATIC;ASMJIT_NO_FOREIGN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS;GLEW_STATIC;BUILD_SYSMIDI;WIN32_OPENGL;__WINDOWS_MM__;ASMJIT_EMBED;ASMJIT_STATIC;ASMJIT_NO_FOREIGN;%(PreprocessorDefinitions);CURL_STATICLIB </PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies);C:\Users\Karjala\source\repos\curl\builds\libcurl-vc-x86-release-static-ipv6-sspi-schannel-obj-lib\libcurl_a.lib;Ws2_32.lib;wldap32.lib;Crypt32.lib;Normaliz.lib</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>

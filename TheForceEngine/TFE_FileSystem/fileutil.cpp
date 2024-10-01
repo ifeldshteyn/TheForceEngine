@@ -1,18 +1,25 @@
 #pragma once
 #include "fileutil.h"
 #include "filestream.h"
+#include <fstream>
+#include <TFE_System/system.h>
 
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <io.h>
+#include "curl/curl.h"
 
 #ifdef _WIN32
 	#include <Windows.h>
+#elif __linux__
+	#include <sys/stat.h>  // For mkdir
+	#include <sys/types.h> // For mode_t
 #endif
 
 namespace FileUtil
 {
+
 	void readDirectory(const char* dir, const char* ext, FileList& fileList)
 	{
 		char searchStr[TFE_MAX_PATH];
@@ -69,6 +76,12 @@ namespace FileUtil
 		{
 			return true;
 		}
+	#elif __linux__
+		mode_t permissions = 0755;
+		if (mkdir(path.c_str(), permissions) == 0 || errno == EEXIST) 
+		{
+			return true;
+		}		
 	#endif
 
 		return false;
@@ -211,6 +224,21 @@ namespace FileUtil
 		name[c-start] = 0;
 	}
 
+	void getDirectoryFromPath(char * path, char* dir)
+	{	
+		std::string pathStr(path);
+		std::size_t lastSlash = pathStr.find_last_of("/\\");
+
+
+		if (lastSlash != std::string::npos) {
+			std::string directory = pathStr.substr(0, lastSlash);
+			std::strcpy(dir, directory.c_str());
+		}
+		else {
+			std::strcpy(dir, "");
+		}
+	}
+
 	void copyFile(const char* srcFile, const char* dstFile)
 	{
 		CopyFile(srcFile, dstFile, FALSE);
@@ -221,11 +249,19 @@ namespace FileUtil
 		DeleteFile(srcFile);
 	}
 
-	bool directoryExits(const char* path, char* outPath)
+	bool directoryExists(const char* path, char* outPath)
 	{
+	#ifdef _WIN32
 		DWORD attr = GetFileAttributesA(path);
 		if (GetFileAttributesA(path) == INVALID_FILE_ATTRIBUTES) { return false; }
 		return (attr & FILE_ATTRIBUTE_DIRECTORY) != 0;
+	#elif __linux__
+		struct stat info;
+		if (stat(path.c_str(), &info) != 0) {
+			return false; 
+		}
+		return (info.st_mode & S_IFDIR);  
+	#endif
 	}
 
 	bool exists( const char *path )
@@ -340,5 +376,90 @@ namespace FileUtil
 		{
 			strcpy(outPath, srcPath);
 		}
+	}
+
+	// Store curl results in a string
+	size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* s) {
+		size_t newLength = size * nmemb;
+		s->append((char*)contents, newLength);
+		return newLength;
+	}
+
+	string curlWeb(const char* webPath)
+	{
+		CURL* req = curl_easy_init();
+		CURLcode res;
+		std::string responseString;
+
+		string responseCharPtr = "";
+
+		if (req)
+		{
+			curl_easy_setopt(req, CURLOPT_URL, webPath);
+			curl_easy_setopt(req, CURLOPT_FOLLOWLOCATION, 1L);
+			curl_easy_setopt(req, CURLOPT_WRITEFUNCTION, WriteCallback);
+			curl_easy_setopt(req, CURLOPT_WRITEDATA, &responseString);
+
+			res = curl_easy_perform(req);
+
+			if (res != CURLE_OK)
+			{
+				fprintf(stderr, "curl_easy_operation() failed : %s\n", curl_easy_strerror(res));
+			}
+			else {
+				responseCharPtr = responseString.c_str();
+			}
+			curl_easy_cleanup(req);
+		}
+		return responseCharPtr;
+	}
+	
+	size_t write_data(void* ptr, size_t size, size_t nmemb, FILE* stream) 
+	{
+		size_t written = fwrite(ptr, size, nmemb, stream);
+		return written;
+	}
+
+	bool download(const char* webPath, const char* downloadPath)
+	{
+		TFE_System::logWrite(LOG_MSG, "Download", "Download started for %s", webPath);
+		bool result = false;
+
+		FILE* outFile = fopen(downloadPath, "wb");
+		if (!outFile)
+		{
+			return result;
+		}
+
+		CURL* req = curl_easy_init();
+		CURLcode res;
+		if (req)
+		{
+			curl_easy_setopt(req, CURLOPT_URL, webPath);
+			curl_easy_setopt(req, CURLOPT_FOLLOWLOCATION, 1L);
+			curl_easy_setopt(req, CURLOPT_WRITEFUNCTION, write_data);
+			curl_easy_setopt(req, CURLOPT_WRITEDATA, outFile);
+
+			res = curl_easy_perform(req);
+
+			if (res != CURLE_OK)
+			{
+				TFE_System::logWrite(LOG_ERROR, "Download", "Failed downloading due to %s", curl_easy_strerror(res));
+			}
+			else
+			{
+				result = true;
+			}
+		}
+		curl_easy_cleanup(req);
+		fclose(outFile);
+		TFE_System::logWrite(LOG_MSG, "Download", "Finished Download for %s", webPath);
+		return result;
+	}
+
+	int getFilesize(const char* filename)
+	{
+		std::ifstream in(filename, std::ifstream::ate | std::ifstream::binary);
+		return in.tellg();
 	}
 }

@@ -24,7 +24,7 @@ namespace FileUtil
 	void deleteFile(const char* srcFile);
 
 	bool exists(const char* path);
-	bool directoryExits(const char* path, char* outPath = nullptr);
+	bool directoryExists(const char* path, char* outPath = nullptr);
 	u64  getModifiedTime(const char* path);
 
 	void fixupPath(char* path);
@@ -32,4 +32,8 @@ namespace FileUtil
 
 	void replaceExtension(const char* srcPath, const char* newExt, char* outPath);
 	void stripExtension(const char* srcPath, char* outPath);
+
+	string curlWeb(const char* webPath);
+	bool download(const char* url, const char* dest);
+	int getFilesize(const char* filename);
 }

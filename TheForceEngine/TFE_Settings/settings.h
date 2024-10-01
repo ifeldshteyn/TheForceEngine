@@ -13,6 +13,7 @@
 #include <TFE_FileSystem/paths.h>
 #include <TFE_Audio/midiDevice.h>
 #include "gameSourceData.h"
+#include <TFE_System/cJSON.h>
 #include <map>
 
 enum SkyMode
@@ -383,7 +384,8 @@ namespace TFE_Settings
 
 	// Settings for level mod overrides.
 	ModSettingLevelOverride getLevelOverrides(string levelName);
-
+	int parseJSonIntToOverride(const cJSON* item);
+	void parseJsonStringArray(const cJSON* item, std::vector<std::string>& stringList);
 	bool validatePath(const char* path, const char* sentinel);
 	void autodetectGamePaths();
 	void clearModSettings();
