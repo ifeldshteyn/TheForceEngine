@@ -230,7 +230,7 @@ namespace FileUtil
 		}
 	}
 
-	bool directoryExits(const char *path, char *outPath)
+	bool directoryExists(const char *path, char *outPath)
 	{
 		char *ret;
 
