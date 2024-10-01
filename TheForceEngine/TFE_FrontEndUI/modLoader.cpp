@@ -1042,7 +1042,7 @@ namespace TFE_FrontEndUI
 				#ifdef _WIN32
 					ShellExecute(0, 0, levelUrl, 0, 0, SW_SHOW);
                 #else
-					system("xdg-open " + std::string(levelUrl));
+					system("xdg-open " + std::string(levelUrl).c_str());
 				#endif
 				}
 			}
