@@ -1,4 +1,3 @@
-#include <cstdarg>
 #include <cstring>
 
 #include <TFE_System/system.h>
@@ -42,26 +41,6 @@ namespace TFE_System
 	{
 		s_logFile.close();
 	}
-	
-	void debugWrite(const char* tag, const char* str, ...)
-	{
-		if (!tag || !str) { return; }
-
-		//Handle the variable input, "printf" style messages
-		va_list arg;
-		va_start(arg, str);
-		vsprintf(s_msgStr, str, arg);
-		va_end(arg);
-
-		sprintf(s_workStr, "[%s] %s\r\n", tag, s_msgStr);
-
-		//Write to the debugger or terminal output.
-		#ifdef _WIN32
-			OutputDebugStringA(s_workStr);
-		#else
-			fprintf(stderr, "%s", s_workStr);
-		#endif
-	}
 
 	void logWrite(LogWriteType type, const char* tag, const char* str, ...)
 	{
@@ -70,8 +49,11 @@ namespace TFE_System
 		auto now = std::chrono::system_clock::now();
 		std::time_t now_c = std::chrono::system_clock::to_time_t(now);
 		std::tm now_tm;
-		localtime_s(&now_tm, &now_c);  // For thread safety on Windows
-
+		#ifdef _WIN32
+			localtime_s(&now_tm, &now_c);  // For thread safety on Windows
+		#else
+			localtime_r(&now_c, &now_tm);  // For thread safety on Linux
+		#endif
 		char timeStr[32];
 		strftime(timeStr, sizeof(timeStr), "%Y-%b-%d %H:%M:%S", &now_tm);
 
