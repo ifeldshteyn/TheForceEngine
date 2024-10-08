@@ -55,6 +55,7 @@
 *.ico
 *.bin
 *.tfs
+*.dmp
 *~
 
 #Directories
@@ -70,6 +71,8 @@ TheForceEngine/Exports/
 TheForceEngine/VTune Profiler Results/
 TheForceEngine/glslang/
 TheForceEngine/Documentation/blog posts/
+TheForceEngine/ModCache/
+
 BuildExes/
 Build/
 TheForceEngine/bug_reports/
@@ -79,7 +82,3 @@ CMakeFiles/
 
 # Linux
 TheForceEngine/tfelnx
-/TheForceEngine/crashdump.dmp
-/TheForceEngine/ModCache
-/test/TheForceEngine/UI_Images
-/test
