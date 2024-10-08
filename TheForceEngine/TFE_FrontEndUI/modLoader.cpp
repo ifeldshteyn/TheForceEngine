@@ -8,6 +8,7 @@
 #include <TFE_System/system.h>
 #include <TFE_System/parser.h>
 #include <TFE_System/cJSON.h>
+#include <TFE_FileSystem/download.h>
 #include <TFE_FileSystem/fileutil.h>
 #include <TFE_FileSystem/paths.h>
 #include <TFE_FileSystem/filestream.h>
@@ -68,7 +69,6 @@ namespace TFE_FrontEndUI
 		std::string textFile;
 		std::string imageFile;
 		UiTexture image;
-		UiImage coverImage;	
 
 		std::string name;
 		std::string relativePath;
@@ -120,14 +120,14 @@ namespace TFE_FrontEndUI
 	int ratingIndex = 0;
 	static bool s_loadedWebJson = false; 
 	bool downloadPopUp = false;
-	int waitFrames = 10;
+	int waitFrames = 3;
 	int frameCounter = 0;
 
 	void fixupName(char* name);
 	void readFromQueue(size_t itemsPerFrame);
 	bool parseNameFromText(const char* textFileName, const char* path, char* name, std::string* fullText);
 	void extractPosterFromImage(const char* baseDir, const char* zipFile, const char* imageFileName, UiTexture* poster);
-	bool extractPosterFromMod(const char* baseDir, const char* archiveFileName, UiTexture* poster);
+	bool extractPosterFromMod(const char* baseDir, const char* archiveFileName, ModData * poster);
 	void filterMods(bool filterByName, bool sort = true);
 
 	const char* dfLevelJson = "https://df-21.net/downloads/conf_files/df_level_list.json";
@@ -145,7 +145,7 @@ namespace TFE_FrontEndUI
 		s_webMods.clear();
 
 		std::vector<std::string> stringModList;
-		string curlResult = FileUtil::curlWeb(dfLevelJson);
+		string curlResult = Download::curlWeb(dfLevelJson);
 		const char* responseCharPtr = curlResult.c_str();
 		cJSON* root = cJSON_Parse(responseCharPtr);
 		if (root)
@@ -428,7 +428,7 @@ namespace TFE_FrontEndUI
 	{
 		DisplayInfo dispInfo;
 		TFE_RenderBackend::getDisplayInfo(&dispInfo);
-		s32 columns = max(1, (s32)((dispInfo.width - s32(16*uiScale)) / s32(268*uiScale))) - 1;
+		s32 columns = max(1, (s32)((dispInfo.width - s32(16*uiScale)) / s32(268*uiScale)));
 
 		f32 y = ImGui::GetCursorPosY();
 		ImDrawList* drawList = ImGui::GetWindowDrawList();
@@ -532,7 +532,7 @@ namespace TFE_FrontEndUI
 		DisplayInfo dispInfo;
 		TFE_RenderBackend::getDisplayInfo(&dispInfo);
 		f32 topPos = ImGui::GetCursorPosY();
-		s32 rowCount = (dispInfo.height - s32(topPos + 24 * uiScale)) / s32(28*uiScale);
+		s32 rowCount = (dispInfo.height - s32(topPos + 24 * uiScale)) / s32(28*uiScale) - 1;
 
 		char buttonLabel[32];
 		ImGui::PushFont(getDialogFont());
@@ -591,7 +591,8 @@ namespace TFE_FrontEndUI
 					s_selectedMod = s32(i);
 					TFE_System::logWrite(LOG_MSG, "Mods", "Selected Mod = %d", i);
 				}
-				
+
+				float hoverAlpha = ImGui::IsItemHovered() ? 1.0f : 0.7f;				
 
 				ImGui::SetCursorPos(ImVec2(cursor.x + 8.0f * uiScale, cursor.y - 2.0f * uiScale));
 				char name[TFE_MAX_PATH];
@@ -606,13 +607,15 @@ namespace TFE_FrontEndUI
 				}
 				char modPath[TFE_MAX_PATH];
 				sprintf(modPath, "%s%s", programDirModDir, s_filteredMods[i]->fileName.c_str());
+				
+
 				if (FileUtil::exists(modPath))
 				{
-					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 1.0f, 0.0f, 1.0f));
+					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 1.0f, 0.0f, hoverAlpha));
 				}
 				else
 				{
-					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.6f, 0.0f, hoverAlpha));
 				}
 				
 				ImGui::LabelText("###", "%s", name);
@@ -659,25 +662,15 @@ namespace TFE_FrontEndUI
 
 		char coverPath[TFE_MAX_PATH];
 		sprintf(coverPath, "%scover.png", modCachePath);
-		//TFE_Paths::fixupPathAsDirectory(coverPath);
 		if (!FileUtil::exists(coverPath))
 		{
-			if (!FileUtil::download(mod->cover.c_str(), coverPath))
+			if (!Download::download(mod->cover.c_str(), coverPath))
 			{
 				return;
 			}
 		}
-		static TFE_FrontEndUI::UiImage s_ModCoverImage;
-		char coverLocalPath[TFE_MAX_PATH];
-		sprintf(coverLocalPath, "ModCache/%s/cover.png", mod->levelName.c_str());
-
-		if (!loadGpuImage(coverLocalPath, &s_ModCoverImage))
-		{
-			TFE_System::logWrite(LOG_ERROR, "SystemUI", "Cannot load Mod Cover : %s", coverPath);
-		}
 
 		mod->textFile = mod->description;
-		mod->coverImage = s_ModCoverImage;
 		mod->text = "Author: " + mod->author + "\n\n" +
 			"Released: " + mod->createDate + "\n\n" +
 			"Updated: " + mod->updateDate + "\n\n" +
@@ -902,25 +895,18 @@ namespace TFE_FrontEndUI
 			ImGui::Begin("Mod Info", &open, /*ImVec2(f32(infoWidth), f32(infoHeight)), 1.0f,*/ window_flags);
 			ImDrawList* drawList = ImGui::GetWindowDrawList();
 			ImVec2 cursor = ImGui::GetCursorPos();
+			
 			if (s_useWebModUI)
 			{
 				handleWebQueueItem(s_filteredMods[s_selectedMod]);
-				drawList->AddImageRounded((*s_filteredMods[s_selectedMod]).coverImage.image,
-					ImVec2(cursor.x + 64, cursor.y + 64),
-					ImVec2(cursor.x + 64 + 320 * uiScale, cursor.y + 64 + 200 * uiScale),
-					ImVec2(0.0f, 0.0f),
-					ImVec2(1.0f, 1.0f),
-					0xffffffff, 8.0f, ImDrawFlags_RoundCornersAll); 
 			}
-			else
-			{			
-				drawList->AddImageRounded(TFE_RenderBackend::getGpuPtr(s_filteredMods[s_selectedMod]->image.texture),
-					ImVec2(cursor.x + 64, cursor.y + 64), 
-					ImVec2(cursor.x + 64 + 320 * uiScale, cursor.y + 64 + 200 * uiScale),
-					ImVec2(0.0f, s_filteredMods[s_selectedMod]->invertImage ? 1.0f : 0.0f), 
-					ImVec2(1.0f, s_filteredMods[s_selectedMod]->invertImage ? 0.0f : 1.0f), 
-					0xffffffff, 8.0f, ImDrawFlags_RoundCornersAll);
-			}
+
+			drawList->AddImageRounded(TFE_RenderBackend::getGpuPtr(s_filteredMods[s_selectedMod]->image.texture),
+				ImVec2(cursor.x + 64, cursor.y + 64),
+				ImVec2(cursor.x + 64 + 320 * uiScale, cursor.y + 64 + 200 * uiScale),
+				ImVec2(0.0f, s_filteredMods[s_selectedMod]->invertImage ? 1.0f : 0.0f),
+				ImVec2(1.0f, s_filteredMods[s_selectedMod]->invertImage ? 0.0f : 1.0f),
+				0xffffffff, 8.0f, ImDrawFlags_RoundCornersAll);
 			ImGui::PushFont(getDialogFont());
 			ImGui::SetCursorPosX(cursor.x + (320 + 70) * uiScale);
 			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8f, 0.9f, 1.0f, 1.0f));
@@ -964,16 +950,17 @@ namespace TFE_FrontEndUI
 			}
 
 			if (s_useWebModUI && !alreadyDownloaded)
-			{							
+			{			
+				bool downloadSuccessful = true; 
+
 				if (downloadPopUp)
 				{
 					ImVec2 windowSize = ImGui::GetWindowSize();
 
 					// Calculate the center position
-					ImVec2 popupSize = ImVec2(200, 100); // You can adjust the size of the popup if you know it
+					ImVec2 popupSize = ImVec2(200, 100); 
 					ImVec2 center = ImVec2((windowSize.x - popupSize.x) * 0.5f, (windowSize.y - popupSize.y) * 0.5f);
 
-					// Set the popup position to the center of the current window
 					ImGui::SetNextWindowPos(center, ImGuiCond_Always);
 					ImGui::OpenPopup("##download");
 				}
@@ -982,25 +969,40 @@ namespace TFE_FrontEndUI
 				{
 					ImGui::Text("Downloading, please wait...");
 
-					// Render the popup first, then trigger the download in the next frame
+					// Render the popup first, then trigger the download in the next frame 
+					// Otherwise the thing won't be seen and user will see a freeze. 
 					if (downloadPopUp)
 					{
 						frameCounter++;
 						if (frameCounter >= waitFrames)
-						{
-							if (!FileUtil::download(s_filteredMods[s_selectedMod]->filePath.c_str(), modPath))
-							{
-								string err_msg = "Failed to download map from " + s_filteredMods[s_selectedMod]->filePath;
-								ImGui::OpenPopup(err_msg.c_str());
-							}
+						{							
+							downloadSuccessful = Download::download(s_filteredMods[s_selectedMod]->filePath.c_str(), modPath);
 
 							s_mods.push_back(*s_filteredMods[s_selectedMod]);
 					
 							downloadPopUp = false;
-							ImGui::CloseCurrentPopup(); // Close popup when done
+							ImGui::CloseCurrentPopup();
 							frameCounter = 0;
 						}
 					}
+					ImGui::EndPopup();
+				}
+				if (!downloadSuccessful) ImGui::OpenPopup("##download_error");
+
+				if (ImGui::BeginPopupModal("##download_error", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+				{
+					ImGui::Text("Error Downloading Mod!");
+
+					ImVec2 availableSpace = ImGui::GetContentRegionAvail();
+					float buttonWidth = ImGui::CalcTextSize("OK").x + ImGui::GetStyle().FramePadding.x * 2.0f;
+
+					ImGui::SetCursorPosX((availableSpace.x - buttonWidth) * 0.5f);
+
+					if (ImGui::Button("OK"))
+					{						
+						ImGui::CloseCurrentPopup();
+					}
+
 					ImGui::EndPopup();
 				}
 
@@ -1038,6 +1040,7 @@ namespace TFE_FrontEndUI
 				ImGui::SetCursorPos(ImVec2(cursor.x + 90 * uiScale, cursor.y + 400 * uiScale));
 				char levelUrl[TFE_MAX_PATH];
 				FileUtil::getFilePath(s_filteredMods[s_selectedMod]->filePath.c_str(), levelUrl);
+				
 				if (ImGui::Button("OPEN SITE", ImVec2(128 * uiScale, 32 * uiScale)) || TFE_Input::keyPressed(KEY_ESCAPE))
 				{
 				#ifdef _WIN32
@@ -1047,6 +1050,46 @@ namespace TFE_FrontEndUI
 					system(xdg_string.c_str());
 				#endif
 				}
+
+				// Keep track of button offset in case there are no reviews.
+				int buttonOffset = 40;
+				string reviewURL = s_filteredMods[s_selectedMod]->review;
+				if (reviewURL != "")
+				{
+					ImGui::SetCursorPos(ImVec2(cursor.x + 90 * uiScale, cursor.y + 440 * uiScale));
+					if (ImGui::Button("REVIEW", ImVec2(128 * uiScale, 32 * uiScale)) || TFE_Input::keyPressed(KEY_ESCAPE))
+					{
+						
+					#ifdef _WIN32
+							ShellExecute(0, 0, reviewURL.c_str(), 0, 0, SW_SHOW);
+					#else
+							string xdg_string = "xdg-open " + reviewURL;
+							system(xdg_string.c_str());
+					#endif
+					}
+				}
+				else
+				{
+					buttonOffset = 0;
+				}
+
+
+				string walkthroughURL = s_filteredMods[s_selectedMod]->walkthrough;
+				if (walkthroughURL != "")
+				{
+					ImGui::SetCursorPos(ImVec2(cursor.x + 90 * uiScale, cursor.y + (440 + buttonOffset) * uiScale));
+					if (ImGui::Button("WALKTHROUGH", ImVec2(128 * uiScale, 32 * uiScale)) || TFE_Input::keyPressed(KEY_ESCAPE))
+					{
+
+					#ifdef _WIN32
+						ShellExecute(0, 0, walkthroughURL.c_str(), 0, 0, SW_SHOW);
+					#else
+						string xdg_string = "xdg-open " + walkthroughURL;
+						system(xdg_string.c_str());
+					#endif
+					}
+				}			
+
 			}
 
 
@@ -1393,6 +1436,44 @@ namespace TFE_FrontEndUI
 		}
 	}
 
+	bool loadCoverPathFromMod(const char* modGobName, UiTexture* poster)
+	{
+		// Check if any of the maps are of the df21 format split by underscores
+		// Ex: convert aons_modern.zip to aons to find it in the ModCache
+		const char* underscorePos = std::strchr(modGobName, '_');
+		char coverCachedPath[TFE_MAX_PATH];
+		if (underscorePos != nullptr)
+		{
+			// Copy characters from input up to the underscore
+			std::strncpy(coverCachedPath, modGobName, underscorePos - modGobName);
+			coverCachedPath[underscorePos - modGobName] = '\0';
+		}
+		else
+		{
+			std::strcpy(coverCachedPath, underscorePos);
+		}
+
+		char modCachePath[TFE_MAX_PATH];
+		sprintf(modCachePath, "%sModCache/%s", TFE_Paths::getPath(PATH_PROGRAM), coverCachedPath);
+		TFE_Paths::fixupPathAsDirectory(modCachePath);
+
+		if (!FileUtil::directoryExists(modCachePath))
+		{
+			return false;
+		}
+
+		char coverPath[TFE_MAX_PATH];
+		sprintf(coverPath, "%scover.png", modCachePath, coverCachedPath);
+		FileUtil::fixupPath(coverPath);
+
+		if (FileUtil::exists(coverPath))
+		{
+			extractPosterFromImage("", nullptr, coverPath, poster);
+			return true;
+		}
+		return false;
+	}
+
 	void readFromQueue(size_t itemsPerFrame)
 	{
 		FileList gobFiles, txtFiles, imgFiles;
@@ -1428,7 +1509,7 @@ namespace TFE_FrontEndUI
 				mod.gobFiles = gobFiles;
 				mod.textFile = txtFiles.empty() ? "" : txtFiles[0];
 				mod.imageFile = imgFiles.empty() ? "" : imgFiles[0];				
-				mod.text = "";
+				mod.text = "";				
 
 				size_t fullDirLen = strlen(subDir);
 				for (size_t i = 0; i < fullDirLen; i++)
@@ -1442,12 +1523,11 @@ namespace TFE_FrontEndUI
 
 				if (mod.imageFile.empty())
 				{
-					if (!extractPosterFromMod(subDir, mod.gobFiles[0].c_str(), &mod.image))
+					if (!extractPosterFromMod(subDir, mod.gobFiles[0].c_str(), &mod))
 					{
 						s_mods.pop_back();
 						continue;
-					}
-					mod.invertImage = true;
+					}					
 				}
 				else
 				{
@@ -1469,7 +1549,6 @@ namespace TFE_FrontEndUI
 			else if (reads[i].type == QREAD_WEB)
 			{
 				ModData cacheMod = s_webModsCache.back();
-				//handleWebQueueItem(&cacheMod);
 				s_webMods.push_back(cacheMod);
 				s_webModsCache.pop_back();
 			}
@@ -1531,14 +1610,10 @@ namespace TFE_FrontEndUI
 					mod.name = name;
 
 					if (jpgFileIndex < 0)
-					{
-						if (!extractPosterFromMod(modPath, mod.gobFiles[0].c_str(), &mod.image))
+					{												
+					    if (!extractPosterFromMod(modPath, mod.gobFiles[0].c_str(), &mod))
 						{
 							s_mods.pop_back();
-						}
-						else
-						{
-							mod.invertImage = true;
 						}
 					}
 					else
@@ -1616,8 +1691,8 @@ namespace TFE_FrontEndUI
 		}
 	}
 
-	bool extractPosterFromMod(const char* baseDir, const char* archiveFileName, UiTexture* poster)
-	{
+	bool extractPosterFromMod(const char* baseDir, const char* archiveFileName, ModData * mod)
+	{		
 		// Extract a "poster", if possible, from the GOB file.
 		// And then save it as a JPG in /ProgramData/TheForceEngine/ModPosters/NAME.jpg
 		char modPath[TFE_MAX_PATH], srcPath[TFE_MAX_PATH], srcPathTex[TFE_MAX_PATH];
@@ -1690,15 +1765,29 @@ namespace TFE_FrontEndUI
 		Archive* archiveBase = Archive::getArchive(ARCHIVE_GOB, "DARK.GOB", srcPath);
 
 		s_readBuffer[0].clear();
-		s_readBuffer[1].clear();
+		s_readBuffer[1].clear();		
 		if (archiveMod || archiveBase)
-		{
+		{						
+			// Check if there is a custom loading screen
 			if (archiveMod && archiveMod->fileExists("wait.bm") && archiveMod->openFile("wait.bm"))
 			{
 				s_readBuffer[0].resize(archiveMod->getFileLength());
 				archiveMod->readFile(s_readBuffer[0].data(), archiveMod->getFileLength());
 				archiveMod->closeFile();
 			}
+
+			// Load the cached version
+			else if (loadCoverPathFromMod(archiveFileName, &mod->image))
+			{
+				if (archiveMod && archiveIsGob)
+				{
+					Archive::freeArchive(archiveMod);
+				}
+				mod->invertImage = false;
+				return true;
+			}
+				
+			// Fall back to the base game loading screen
 			else if (archiveTex->openFile("wait.bm"))
 			{
 				s_readBuffer[0].resize(archiveTex->getFileLength());
@@ -1725,14 +1814,14 @@ namespace TFE_FrontEndUI
 			TextureData* imageData = bitmap_loadFromMemory(s_readBuffer[0].data(), s_readBuffer[0].size(), 1);
 			u32 palette[256];
 			convertPalette(s_readBuffer[1].data(), palette);
-			createTexture(imageData, palette, poster, MAG_FILTER_LINEAR);
+			createTexture(imageData, palette, &mod->image, MAG_FILTER_LINEAR);
 		}
 
 		if (archiveMod && archiveIsGob)
 		{
 			Archive::freeArchive(archiveMod);
 		}
-
+		mod->invertImage = validGob;
 		return validGob;
 	}
 }

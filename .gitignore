@@ -79,3 +79,7 @@ CMakeFiles/
 
 # Linux
 TheForceEngine/tfelnx
+/TheForceEngine/crashdump.dmp
+/TheForceEngine/ModCache
+/test/TheForceEngine/UI_Images
+/test
