@@ -87,5 +87,4 @@ namespace Download
 		TFE_System::logWrite(LOG_MSG, "Download", "Finished Download for %s", webPath);
 		return result;
 	}
-
 }

@@ -8,13 +8,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <io.h>
-#include "curl/curl.h"
 
 #ifdef _WIN32
 	#include <Windows.h>
-#elif __linux__
-	#include <sys/stat.h>  // For mkdir
-	#include <sys/types.h> // For mode_t
 #endif
 
 namespace FileUtil
@@ -75,13 +71,7 @@ namespace FileUtil
 		if (CreateDirectoryA(dir, NULL) || GetLastError() == ERROR_ALREADY_EXISTS)
 		{
 			return true;
-		}
-	#elif __linux__
-		mode_t permissions = 0755;
-		if (mkdir(path.c_str(), permissions) == 0 || errno == EEXIST) 
-		{
-			return true;
-		}		
+		}	
 	#endif
 
 		return false;
@@ -234,7 +224,8 @@ namespace FileUtil
 			std::string directory = pathStr.substr(0, lastSlash);
 			std::strcpy(dir, directory.c_str());
 		}
-		else {
+		else 
+		{
 			std::strcpy(dir, "");
 		}
 	}
@@ -254,13 +245,7 @@ namespace FileUtil
 	#ifdef _WIN32
 		DWORD attr = GetFileAttributesA(path);
 		if (GetFileAttributesA(path) == INVALID_FILE_ATTRIBUTES) { return false; }
-		return (attr & FILE_ATTRIBUTE_DIRECTORY) != 0;
-	#elif __linux__
-		struct stat info;
-		if (stat(path.c_str(), &info) != 0) {
-			return false; 
-		}
-		return (info.st_mode & S_IFDIR);  
+		return (attr & FILE_ATTRIBUTE_DIRECTORY) != 0;	
 	#endif
 	}
 
