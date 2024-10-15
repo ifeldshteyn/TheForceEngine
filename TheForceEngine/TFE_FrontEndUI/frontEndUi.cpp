@@ -1390,6 +1390,31 @@ namespace TFE_FrontEndUI
 		}
 	}
 
+	bool enhanceGOBExists()
+	{
+		TFE_GameHeader* darkForces = TFE_Settings::getGameHeader("Dark Forces");
+		char testFile[TFE_MAX_PATH];
+		sprintf(testFile, "%senhanced.gob", darkForces->sourcePath);
+		return FileUtil::exists(testFile);
+	}
+
+	// Expose the function to toggle enhancements.
+	bool toggleEnhancements()
+	{		
+		if (enhanceGOBExists())
+		{
+			TFE_Settings_Enhancements* enhancements = TFE_Settings::getEnhancementsSettings();
+			bool useHdAssets = enhancements->enableHdTextures && enhancements->enableHdSprites && enhancements->enableHdHud;
+			enhancements->enableHdTextures = !useHdAssets;
+			enhancements->enableHdSprites = !useHdAssets;
+			enhancements->enableHdHud = !useHdAssets;
+
+			renderBackground(true);
+			return useHdAssets;
+		}
+		return false;
+	}
+
 	bool configEnhancements()
 	{
 		s32 browseWinOpen = -1;
@@ -1398,19 +1423,12 @@ namespace TFE_FrontEndUI
 		//////////////////////////////////////////////////////
 		// Source Game Data
 		//////////////////////////////////////////////////////
-		TFE_GameHeader* darkForces = TFE_Settings::getGameHeader("Dark Forces");
 		ImGui::PushFont(s_dialogFont);
 		ImGui::LabelText("##ConfigLabel", "Enhanced Assets");
 		ImGui::PopFont();
 
 		// Try to open 'enhanced.gob'.
-		bool enhancedGobExists = false;
-		char testFile[TFE_MAX_PATH];
-		sprintf(testFile, "%senhanced.gob", darkForces->sourcePath);
-		if (FileUtil::exists(testFile))
-		{
-			enhancedGobExists = true;
-		}
+		bool enhancedGobExists = enhanceGOBExists();
 
 		if (enhancedGobExists)
 		{
@@ -1445,6 +1463,15 @@ namespace TFE_FrontEndUI
 			enhancements->enableHdSprites = false;
 			enhancements->enableHdHud = false;
 		}
+
+		ImGui::Spacing();
+		bool useHdAssets = enhancements->enableHdTextures && enhancements->enableHdSprites && enhancements->enableHdHud;
+		if (ImGui::Checkbox("Use HD Assets", &useHdAssets))
+		{
+			toggleEnhancements();
+		}
+		ImGui::Separator();
+		ImGui::Spacing();
 
 		bool useHdTextures = enhancements->enableHdTextures;
 		if (ImGui::Checkbox("Use HD Textures", &useHdTextures))
@@ -2134,6 +2161,7 @@ namespace TFE_FrontEndUI
 				inputMapping("Headwave",          IADF_HEADWAVE_TOGGLE);
 				inputMapping("HUD Toggle",        IADF_HUD_TOGGLE);
 				inputMapping("Holster Weapon",    IADF_HOLSTER_WEAPON);
+				inputMapping("HD Asset Toggle",   IADF_HD_ASSET_TOGGLE);
 				inputMapping("Automount Toggle",  IADF_AUTOMOUNT_TOGGLE);
 				inputMapping("Cycle Prev Weapon", IADF_CYCLEWPN_PREV);
 				inputMapping("Cycle Next Weapon", IADF_CYCLEWPN_NEXT);

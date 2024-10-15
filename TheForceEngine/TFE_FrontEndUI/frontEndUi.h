@@ -35,7 +35,7 @@ namespace TFE_FrontEndUI
 
 	AppState update();
 	void draw(bool drawFrontEnd = true, bool noGameData = false, bool setDefaults = false, bool showFps = false);
-	void setCurrentGame(IGame* game);
+	void setCurrentGame(IGame* game);	
 
 	void setAppState(AppState state);
 	void enableConfigMenu();
@@ -51,6 +51,7 @@ namespace TFE_FrontEndUI
 	bool isConsoleAnimating();
 	void logToConsole(const char* str);
 	bool uiControlsEnabled();
+	bool toggleEnhancements();
 
 	char* getSelectedMod();
 	void  clearSelectedMod();
