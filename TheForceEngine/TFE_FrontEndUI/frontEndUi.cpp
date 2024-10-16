@@ -2700,7 +2700,7 @@ namespace TFE_FrontEndUI
 		ImGui::Separator();
 
 		ImGui::SetNextItemWidth(196*s_uiScale);
-		ImGui::SliderFloat("Scale", &hud->scale, 0.0f, 15.0f, "%.2f"); ImGui::SameLine(0.0f, 32.0f*s_uiScale);
+		ImGui::SliderFloat("Scale", &hud->scale, 0.0f, 15.0f, "%.2f"); ImGui::SameLine(0.0f, 29.5f*s_uiScale);
 		ImGui::SetNextItemWidth(128 * s_uiScale);
 		ImGui::InputFloat("##HudScaleText", &hud->scale, 0.01f, 0.1f, "%.3f", ImGuiInputTextFlags_CharsHexadecimal);
 
