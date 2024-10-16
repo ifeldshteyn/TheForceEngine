@@ -38,6 +38,10 @@
 
 #include <climits>
 
+#ifdef _WIN32
+	#include <windows.h>
+#endif
+
 using namespace TFE_Input;
 using namespace TFE_Audio;
 
@@ -2168,6 +2172,8 @@ namespace TFE_FrontEndUI
 				inputMapping("Prev Weapon",       IADF_WPN_PREV);
 				inputMapping("Pause",             IADF_PAUSE);
 				inputMapping("Automap",           IADF_AUTOMAP);
+				inputMapping("Screenshot",        IADF_SCREENSHOT);
+
 								
 				ImGui::Separator();
 
@@ -2902,6 +2908,22 @@ namespace TFE_FrontEndUI
 		s32 framerate = (s32)system->gifRecordingFramerate;
 		DrawLabelledIntSlider(labelW, valueW - 2, "GIF Recording Framerate", "##CBO", &framerate, 10, 30);
 		system->gifRecordingFramerate = (f32)framerate;
+
+#ifdef _WIN32
+		ImGui::Separator();
+		if (ImGui::Button("Open Log Folder"))
+		{
+			char logDir[TFE_MAX_PATH];
+			TFE_Paths::appendPath(TFE_PathType::PATH_USER_DOCUMENTS, "", logDir);
+			ShellExecute(NULL, "open", logDir, NULL, NULL, SW_SHOWNORMAL);
+		}
+		if (ImGui::Button("Open Screenshots Folder"))
+		{
+			char screenshotDir[TFE_MAX_PATH];
+			TFE_Paths::appendPath(TFE_PathType::PATH_USER_DOCUMENTS, "Screenshots/", screenshotDir);
+			ShellExecute(NULL, "open", screenshotDir, NULL, NULL, SW_SHOWNORMAL);
+		}
+#endif
 	}
 
 	void DrawFontSizeCombo(float labelWidth, float valueWidth, const char* label, const char* comboTag, s32* currentValue)
