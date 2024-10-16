@@ -83,6 +83,20 @@ static const char* s_loadRequestFilename = nullptr;
 void parseOption(const char* name, const std::vector<const char*>& values, bool longName);
 bool validatePath();
 
+void takeScreenshot()
+{
+	static u64 _screenshotIndex = 0;
+
+	char screenshotDir[TFE_MAX_PATH];
+	TFE_Paths::appendPath(TFE_PathType::PATH_USER_DOCUMENTS, "Screenshots/", screenshotDir);
+
+	char screenshotPath[TFE_MAX_PATH];
+	sprintf(screenshotPath, "%stfe_screenshot_%s_%" PRIu64 ".png", screenshotDir, s_screenshotTime, _screenshotIndex);
+	_screenshotIndex++;
+
+	TFE_RenderBackend::queueScreenshot(screenshotPath);
+}
+
 void handleEvent(SDL_Event& Event)
 {
 	TFE_Ui::setUiInput(&Event);
@@ -147,7 +161,7 @@ void handleEvent(SDL_Event& Event)
 				TFE_Input::setKeyUp(KeyboardCode(Event.key.keysym.scancode));
 
 				// Fullscreen toggle.
-				bool altHeld = TFE_Input::keyDown(KEY_LALT) || TFE_Input::keyDown(KEY_RALT);
+				bool altHeld = TFE_Input::keyDown(KEY_LALT) || TFE_Input::keyDown(KEY_RALT);				
 				if (code == KeyboardCode::KEY_F11 || (code == KeyboardCode::KEY_RETURN && altHeld))
 				{
 					windowSettings->fullscreen = !windowSettings->fullscreen;
@@ -155,16 +169,7 @@ void handleEvent(SDL_Event& Event)
 				}
 				else if (code == KeyboardCode::KEY_PRINTSCREEN)
 				{
-					static u64 _screenshotIndex = 0;
-
-					char screenshotDir[TFE_MAX_PATH];
-					TFE_Paths::appendPath(TFE_PathType::PATH_USER_DOCUMENTS, "Screenshots/", screenshotDir);
-										
-					char screenshotPath[TFE_MAX_PATH];
-					sprintf(screenshotPath, "%stfe_screenshot_%s_%" PRIu64 ".png", screenshotDir, s_screenshotTime, _screenshotIndex);
-					_screenshotIndex++;
-
-					TFE_RenderBackend::queueScreenshot(screenshotPath);
+					takeScreenshot();
 				}
 				else if (code == KeyboardCode::KEY_F2 && altHeld)
 				{
@@ -846,6 +851,12 @@ int main(int argc, char* argv[])
 				}
 				s_soundPaused = false;
 			}
+		}
+
+		// Take screenshot handler (in addition to PRINT SCREEN which is unchanged).
+		if (inputMapping_getActionState(IADF_SCREENSHOT) == STATE_PRESSED)
+		{
+			takeScreenshot();
 		}
 
 		#ifdef ENABLE_FORCE_SCRIPT

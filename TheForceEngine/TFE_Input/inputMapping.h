@@ -80,6 +80,9 @@ namespace TFE_Input
 		// HD Toggle
 		IADF_HD_ASSET_TOGGLE,
 
+		// Screenshot
+		IADF_SCREENSHOT,
+
 		IA_COUNT,
 		IAS_COUNT = IAS_SYSTEM_MENU + 1,
 	};
