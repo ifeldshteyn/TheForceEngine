@@ -83,20 +83,6 @@ static const char* s_loadRequestFilename = nullptr;
 void parseOption(const char* name, const std::vector<const char*>& values, bool longName);
 bool validatePath();
 
-void takeScreenshot()
-{
-	static u64 _screenshotIndex = 0;
-
-	char screenshotDir[TFE_MAX_PATH];
-	TFE_Paths::appendPath(TFE_PathType::PATH_USER_DOCUMENTS, "Screenshots/", screenshotDir);
-
-	char screenshotPath[TFE_MAX_PATH];
-	sprintf(screenshotPath, "%stfe_screenshot_%s_%" PRIu64 ".png", screenshotDir, s_screenshotTime, _screenshotIndex);
-	_screenshotIndex++;
-
-	TFE_RenderBackend::queueScreenshot(screenshotPath);
-}
-
 void handleEvent(SDL_Event& Event)
 {
 	TFE_Ui::setUiInput(&Event);
@@ -166,10 +152,6 @@ void handleEvent(SDL_Event& Event)
 				{
 					windowSettings->fullscreen = !windowSettings->fullscreen;
 					TFE_RenderBackend::enableFullscreen(windowSettings->fullscreen);
-				}
-				else if (code == KeyboardCode::KEY_PRINTSCREEN)
-				{
-					takeScreenshot();
 				}
 				else if (code == KeyboardCode::KEY_F2 && altHeld)
 				{
@@ -510,6 +492,21 @@ void generateScreenshotTime()
 			break;
 		}
 	}
+}
+
+
+void takeScreenshot()
+{
+	static u64 _screenshotIndex = 0;
+
+	char screenshotDir[TFE_MAX_PATH];
+	TFE_Paths::appendPath(TFE_PathType::PATH_USER_DOCUMENTS, "Screenshots/", screenshotDir);
+
+	char screenshotPath[TFE_MAX_PATH];
+	sprintf(screenshotPath, "%stfe_screenshot_%s_%" PRIu64 ".png", screenshotDir, s_screenshotTime, _screenshotIndex);
+	_screenshotIndex++;
+
+	TFE_RenderBackend::queueScreenshot(screenshotPath);
 }
 
 bool validatePath()
@@ -853,7 +850,7 @@ int main(int argc, char* argv[])
 			}
 		}
 
-		// Take screenshot handler (in addition to PRINT SCREEN which is unchanged).
+		// Take screenshot handler
 		if (inputMapping_getActionState(IADF_SCREENSHOT) == STATE_PRESSED)
 		{
 			takeScreenshot();
