@@ -42,6 +42,13 @@ namespace TFE_Settings
 	static TFE_ModSettings s_modSettings = {};
 	static std::vector<char> s_iniBuffer;
 
+	//MOD CONF Version ENUM
+	enum ModConfVersion
+	{
+		MOD_CONF_INIT_VER = 0x00010000,
+		MOD_CONF_CUR_VERSION = MOD_CONF_INIT_VER
+	};
+
 	enum SectionID
 	{
 		SECTION_WINDOW = 0,
@@ -1528,6 +1535,17 @@ namespace TFE_Settings
 			for (; curElem; curElem = curElem->next)
 			{
 				if (!curElem->string) { continue; }
+				
+				// Ensure the version is supported.
+				if (strcasecmp(curElem->string, "TFE_VERSION") == 0)
+				{
+					int modVersion = parseJSonIntToOverride(curElem);
+					if (modVersion < MOD_CONF_CUR_VERSION)
+					{
+						TFE_System::logWrite(LOG_WARNING, "MOD_CONF", "This MOD Conf version is not supported by this Force Engine release.");
+						return;
+					}
+				}
 
 				if (strcasecmp(curElem->string, "TFE_OVERRIDES") == 0 && cJSON_IsObject(curElem))
 				{
