@@ -80,8 +80,9 @@ namespace TFE_Input
 		// HD Toggle
 		IADF_HD_ASSET_TOGGLE,
 
-		// Screenshot
+		// Screenshot and GIF record
 		IADF_SCREENSHOT,
+		IADF_GIF_RECORD,
 
 		IA_COUNT,
 		IAS_COUNT = IAS_SYSTEM_MENU + 1,
