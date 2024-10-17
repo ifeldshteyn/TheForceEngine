@@ -90,9 +90,9 @@ namespace TFE_Input
 		{ IAS_QUICK_LOAD, ITYPE_KEYBOARD, KEY_F9, KEYMOD_ALT },
 
 		// HD Asset
-		{ IADF_HD_ASSET_TOGGLE, ITYPE_KEYBOARD, KEY_F2, KEYMOD_ALT },
+		{ IADF_HD_ASSET_TOGGLE, ITYPE_KEYBOARD, KEY_F3, KEYMOD_ALT },
 		{ IADF_SCREENSHOT, ITYPE_KEYBOARD, KEY_PRINTSCREEN },
-		
+		{ IADF_GIF_RECORD, ITYPE_KEYBOARD, KEY_F2, KEYMOD_ALT},		
 	};
 
 	static InputBinding s_defaultControllerBinds[] =
@@ -268,6 +268,7 @@ namespace TFE_Input
 		{
 			inputMapping_addBinding(&s_defaultKeyboardBinds[IADF_HD_ASSET_TOGGLE]);
 			inputMapping_addBinding(&s_defaultKeyboardBinds[IADF_SCREENSHOT]);
+			inputMapping_addBinding(&s_defaultKeyboardBinds[IADF_GIF_RECORD]);
 		}
 
 		return true;

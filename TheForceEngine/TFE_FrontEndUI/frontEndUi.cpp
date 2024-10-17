@@ -2173,6 +2173,7 @@ namespace TFE_FrontEndUI
 				inputMapping("Pause",             IADF_PAUSE);
 				inputMapping("Automap",           IADF_AUTOMAP);
 				inputMapping("Screenshot",        IADF_SCREENSHOT);
+				inputMapping("GIF Recording",     IADF_GIF_RECORD);
 
 								
 				ImGui::Separator();
