@@ -3038,4 +3038,10 @@ namespace TFE_DarkForces
 			}
 		}
 	}
+
+	void rotate180()
+	{
+		s_playerYaw = (s_playerYaw + ANGLE_HALF) & ANGLE_MASK;
+	}
+
 }  // TFE_DarkForces

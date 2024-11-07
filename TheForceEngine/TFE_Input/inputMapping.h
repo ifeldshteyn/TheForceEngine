@@ -84,6 +84,9 @@ namespace TFE_Input
 		IADF_SCREENSHOT,
 		IADF_GIF_RECORD,
 
+		// 180 Rotation
+		IADF_ROTATE_PLAYER,
+
 		IA_COUNT,
 		IAS_COUNT = IAS_SYSTEM_MENU + 1,
 	};
