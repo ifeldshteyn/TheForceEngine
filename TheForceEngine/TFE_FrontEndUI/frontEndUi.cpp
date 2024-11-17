@@ -2187,7 +2187,7 @@ namespace TFE_FrontEndUI
 				Tooltip("Display a countdown and then start recording a GIF. Press again to stop recording.");
 				inputMapping("Instant GIF Record",IADF_GIF_RECORD_NO_COUNTDOWN);
 				Tooltip("Start recording immediately without the countdown. Press again to stop recording.");
-				
+				inputMapping("Camera Toggle", IADF_CAMERA);
 				ImGui::Separator();
 
 				ImGui::PushFont(s_dialogFont);

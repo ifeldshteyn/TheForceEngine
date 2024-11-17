@@ -953,6 +953,10 @@ namespace TFE_Jedi
 				{
 					trigger->master = JFALSE;
 				} break;
+				case KW_NAME:
+				{
+					trigger->name = strToUInt(s_infArg0);
+				} break;
 				case KW_TEXT:
 				{
 					if (s_infArg0[0] >= '0' && s_infArg0[0] <= '9')

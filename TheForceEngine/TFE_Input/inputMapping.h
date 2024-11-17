@@ -85,6 +85,9 @@ namespace TFE_Input
 		IADF_GIF_RECORD,
 		IADF_GIF_RECORD_NO_COUNTDOWN,
 
+		// Camera
+		IADF_CAMERA,
+
 		IA_COUNT,
 		IAS_COUNT = IAS_SYSTEM_MENU + 1,
 	};

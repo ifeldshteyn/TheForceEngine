@@ -1372,6 +1372,12 @@ namespace TFE_DarkForces
 				weapon_holster();
 			}
 
+			if (inputMapping_getActionState(IADF_CAMERA) == STATE_PRESSED)
+			{
+				hud_sendTextMessage("Toggling Actor Targetjum", 1);
+				s_targetPlayer = s_targetPlayer ? JFALSE : JTRUE;
+			}
+
 			if (inputMapping_getActionState(IADF_HD_ASSET_TOGGLE) == STATE_PRESSED)
 			{
 				const char* msg = TFE_System::getMessage(TFE_MSG_HD);
@@ -1598,5 +1604,7 @@ namespace TFE_DarkForces
 		vfb_setPalette(zero);
 		vfb_setPalette(zero);
 	}
+
+	void moveCamera
 
 }  // TFE_DarkForces

@@ -59,7 +59,7 @@ namespace TFE_DarkForces
 
 	extern ThinkerModule* actor_createFlyingModule(Logic* logic);
 	extern ThinkerModule* actor_createFlyingModule_Remote(Logic* logic);
-	
+
 	///////////////////////////////////////////
 	// API Implementation
 	///////////////////////////////////////////
@@ -843,6 +843,9 @@ namespace TFE_DarkForces
 		LogicAnimation* anim = &attackMod->anim;
 		s32 state = attackMod->anim.state;
 
+		// Target Override
+		vec3_fixed targetObj = s_targetPlayer ? s_playerObject->posWS : s_eyePos;
+
 		switch (state)
 		{
 			case STATE_DELAY:
@@ -898,17 +901,18 @@ namespace TFE_DarkForces
 						attackMod->timing.delay = attackMod->timing.searchDelay;
 						actor_setupInitAnimation();
 					}
-					return attackMod->timing.delay;
+					return attackMod->timing.delay; 
 				}
 				else
 				{
-					actor_updatePlayerVisiblity(JTRUE, s_eyePos.x, s_eyePos.z);
+					actor_updatePlayerVisiblity(JTRUE, targetObj.x, targetObj.z);
 					attackMod->timing.nextTick = s_curTick + attackMod->timing.losDelay;
-					fixed16_16 dist = distApprox(s_playerObject->posWS.x, s_playerObject->posWS.z, obj->posWS.x, obj->posWS.z);
-					fixed16_16 yDiff = TFE_Jedi::abs(obj->posWS.y - obj->worldHeight - s_eyePos.y);
+					fixed16_16 dist = distApprox(targetObj.x, targetObj.z, obj->posWS.x, obj->posWS.z);
+					fixed16_16 yDiff = TFE_Jedi::abs(obj->posWS.y - obj->worldHeight - targetObj.y);
+					
 					angle14_32 vertAngle = vec2ToAngle(yDiff, dist);
 
-					fixed16_16 baseYDiff = TFE_Jedi::abs(s_playerObject->posWS.y - obj->posWS.y);
+					fixed16_16 baseYDiff = TFE_Jedi::abs(targetObj.y - obj->posWS.y);
 					dist += baseYDiff;
 
 					if (vertAngle < 2275 && dist <= attackMod->maxDist)	// ~50 degrees
@@ -958,7 +962,8 @@ namespace TFE_DarkForces
 
 						attackMod->target.pos.x = obj->posWS.x;
 						attackMod->target.pos.z = obj->posWS.z;
-						attackMod->target.yaw   = vec2ToAngle(s_eyePos.x - obj->posWS.x, s_eyePos.z - obj->posWS.z);
+						
+						attackMod->target.yaw = vec2ToAngle(targetObj.x - obj->posWS.x, targetObj.z - obj->posWS.z);
 						attackMod->target.pitch = obj->pitch;
 						attackMod->target.roll  = obj->roll;
 						attackMod->target.flags |= (TARGET_MOVE_XZ | TARGET_MOVE_ROT);
@@ -982,8 +987,8 @@ namespace TFE_DarkForces
 				if (attackMod->attackFlags & ATTFLAG_MELEE)
 				{
 					attackMod->anim.state = STATE_ANIMATE1;
-					fixed16_16 dy = TFE_Jedi::abs(obj->posWS.y - s_playerObject->posWS.y);
-					fixed16_16 dist = dy + distApprox(s_playerObject->posWS.x, s_playerObject->posWS.z, obj->posWS.x, obj->posWS.z);
+					fixed16_16 dy = TFE_Jedi::abs(obj->posWS.y - targetObj.y);
+					fixed16_16 dist = dy + distApprox(targetObj.x, targetObj.z, obj->posWS.x, obj->posWS.z);
 					if (dist < attackMod->meleeRange)
 					{
 						sound_playCued(attackMod->attackSecSndSrc, obj->posWS);
@@ -1019,7 +1024,7 @@ namespace TFE_DarkForces
 					// TDs are lobbed at an angle that depends on distance from target
 					proj->bounceCnt = 0;
 					proj->duration = 0xffffffff;
-					vec3_fixed target = { s_playerObject->posWS.x, s_eyePos.y + ONE_16, s_playerObject->posWS.z };
+					vec3_fixed target = { targetObj.x, targetObj.y + ONE_16 - s_playerObject->worldHeight, targetObj.z };
 					proj_aimArcing(proj, target, proj->speed);
 
 					if (attackMod->fireOffset.x | attackMod->fireOffset.z)
@@ -1040,7 +1045,7 @@ namespace TFE_DarkForces
 					}
 
 					// Aim at the target.
-					vec3_fixed target = { s_eyePos.x, s_eyePos.y + ONE_16, s_eyePos.z };
+					vec3_fixed target = { targetObj.x, targetObj.y + ONE_16 - s_playerObject->worldHeight, targetObj.z };
 					proj_aimAtTarget(proj, target);
 					if (attackMod->fireSpread)
 					{
@@ -1081,7 +1086,7 @@ namespace TFE_DarkForces
 				{
 					proj->bounceCnt = 0;
 					proj->duration = 0xffffffff;
-					vec3_fixed target = { s_playerObject->posWS.x, s_eyePos.y + ONE_16, s_playerObject->posWS.z };
+					vec3_fixed target = { targetObj.x, targetObj.y + ONE_16, targetObj.z };
 					proj_aimArcing(proj, target, proj->speed);
 
 					if (attackMod->fireOffset.x | attackMod->fireOffset.z)
@@ -1099,7 +1104,7 @@ namespace TFE_DarkForces
 						proj->delta.z = attackMod->fireOffset.z;
 						proj_handleMovement(proj);
 					}
-					vec3_fixed target = { s_eyePos.x, s_eyePos.y + ONE_16, s_eyePos.z };
+					vec3_fixed target = { targetObj.x, targetObj.y + ONE_16, targetObj.z };
 					proj_aimAtTarget(proj, target);
 					if (attackMod->fireSpread)
 					{
@@ -1215,8 +1220,8 @@ namespace TFE_DarkForces
 			}
 			else
 			{
-				targetX = s_eyePos.x;
-				targetZ = s_eyePos.z;
+				targetX = s_playerObject->posWS.x;
+				targetZ = s_playerObject->posWS.z;
 			}
 
 			fixed16_16 targetOffset;

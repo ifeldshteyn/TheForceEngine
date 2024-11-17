@@ -261,6 +261,7 @@ namespace TFE_DarkForces
 	s32 s_onMovingSurface = 0;
 	// Other
 	s32 s_playerCrouch = 0;
+	JBool s_targetPlayer = JTRUE;
 			   
 	///////////////////////////////////////////
 	// Forward Declarations
