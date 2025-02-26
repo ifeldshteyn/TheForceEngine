@@ -77,15 +77,23 @@ namespace TFE_System
 			localtime_r(&now_c, &now_tm);  // For thread safety on Linux
 		#endif
 
-		char timeStr[32];
-		strftime(timeStr, sizeof(timeStr), "%Y-%b-%d %H:%M:%S", &now_tm);
+		auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
+			now.time_since_epoch()) % 1000;
+
+		char timeStr[40];
+		strftime(timeStr, sizeof(timeStr) - 4, "%Y-%b-%d %H:%M:%S", &now_tm); // Leave space for milliseconds
+
+		// Add milliseconds to the formatted time
+		snprintf(timeStr + strlen(timeStr), 5, ".%03lld", milliseconds.count());
+
 
 		//Handle the variable input, "printf" style messages
 		va_list arg;
 		va_start(arg, str);
 		vsprintf(s_msgStr, str, arg);
 		va_end(arg);
-		//Format the message
+
+		//Format the message		
 		if (type != LOG_MSG)
 		{
 			sprintf(s_workStr, "%s - [%s : %s] %s\r\n", timeStr, c_typeNames[type], tag, s_msgStr);
@@ -94,6 +102,7 @@ namespace TFE_System
 		{
 			sprintf(s_workStr, "%s - [%s] %s\r\n", timeStr, tag, s_msgStr);
 		}
+
 		//Write to disk
 		s_logFile.writeBuffer(s_workStr, (u32)strlen(s_workStr));
 		//Make sure to flush the file to disk if a crash is likely.

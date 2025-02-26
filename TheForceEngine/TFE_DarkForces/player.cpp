@@ -361,6 +361,9 @@ namespace TFE_DarkForces
 		s_playerInfo.health      = pickup_addToValue(0, 100, s_healthMax);
 		s_playerInfo.healthFract = 0;
 		s_batteryPower = s_batteryPowerMax;
+		// Always reset player ticks on init for replay consistency
+		s_playerTick = 0;
+		s_prevPlayerTick = 0;
 		s_reviveTick = 0;
 
 		s_automapLocked = JTRUE;
@@ -917,6 +920,10 @@ namespace TFE_DarkForces
 	{
 		s_playerObject = obj;
 		obj_addLogic(obj, (Logic*)&s_playerLogic, LOGIC_PLAYER, s_playerTask, playerLogicCleanupFunc);
+
+		// Wipe out the player logic for replay consistency
+		s_playerLogic.move = {};
+		s_playerLogic.dir = {};
 
 		s_playerObject->entityFlags|= ETFLAG_PLAYER;
 		s_playerObject->flags      |= OBJ_FLAG_MOVABLE;
@@ -1585,7 +1592,7 @@ namespace TFE_DarkForces
 					}
 				}
 			}
-						
+
 			s_prevPlayerTick = s_playerTick;
 			task_yield(TASK_NO_DELAY);
 		}
@@ -1947,7 +1954,7 @@ namespace TFE_DarkForces
 				s_playerInWater = JTRUE;
 			}
 		}
-
+ 
 		// Apply friction to existing velocity.
 		if (s_playerVelX || s_playerVelZ)
 		{
