@@ -297,7 +297,7 @@ namespace TFE_DarkForces
 	// Serialization
 	void generatorLogic_serialize(Logic*& logic, SecObject* obj, Stream* stream)
 	{
-		/*
+		
 		Generator* gen;
 		if (serialization_getMode() == SMODE_WRITE)
 		{
@@ -371,6 +371,6 @@ namespace TFE_DarkForces
 		SERIALIZE(ObjState_CustomLogics, len, 0);
 		SERIALIZE_BUF(ObjState_CustomLogics, gen->logicName, len);
 		gen->logicName[len] = 0;
-		*/
+		
 	}
 }  // TFE_DarkForces
