@@ -511,6 +511,12 @@ std::string getExecutablePathFromArgs(const char* arg0) {
 	return "";
 }
 
+bool fileExists(const std::string& filename) {
+	std::ifstream file(filename);
+	return file.good();  // Returns true if file exists and is accessible
+}
+
+
 int main(int argc, char* argv[])
 {
 
@@ -572,8 +578,10 @@ int main(int argc, char* argv[])
 	}
 
 
+
+
 	std::cout << "DOC PATH -->" << TFE_Paths::getPath(PATH_USER_DOCUMENTS) << std::endl;
-	TFE_System::logOpen("the_force_engine_log.txt");
+	bool res = TFE_System::logOpen("the_force_engine_log.txt");
 	TFE_System::logWrite(LOG_MSG, "Main", "The Force Engine %s", c_gitVersion);
 	if (!pathsSet)
 	{
@@ -581,6 +589,15 @@ int main(int argc, char* argv[])
 		return PROGRAM_ERROR;
 	}
 	TFE_System::logClose();
+	bool fileExist = fileExists("/home/runner/work/TheForceEngine/TheForceEngine/logs/.local/share/TheForceEngine/the_force_engine_log.txt");
+	std::ofstream file4("/home/runner/work/TheForceEngine/TheForceEngine/result.log", std::ios::app); // Open the file for writing
+	if (file4.is_open()) {
+		file4 << "Hello World\n"; // Write to the file
+		file4 << "[" << res << "]\n";
+		file4 << "[" << fileExist << "]\n";
+		file4 << "Hello World2\n"; // Write to the file
+		file4.close(); // Close the file
+	}
 	return 5;
 }
 /*
