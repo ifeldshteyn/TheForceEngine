@@ -64,35 +64,29 @@ pushd $root_path
 
 # LDD check
 
-ldd $root_path/theforceengine
+# ldd $root_path/theforceengine
 
 echo "Running TFE test..."
 date
-echo "Executing Command $root_path/theforceengine -gDark -r$demo_path --demo_logging --exit_after_replay ....."
-$root_path/theforceengine -gDark -r$demo_path --demo_logging --exit_after_replay > output.log 2>error.log
+echo "Executing Command $root_path/theforceengine"
+$root_path/theforceengine
+#echo "Executing Command $root_path/theforceengine -gDark -r$demo_path --demo_logging --exit_after_replay ....."
+#$root_path/theforceengine -gDark -r$demo_path --demo_logging --exit_after_replay
 result=$?
 date
 
-if [ -f output.log ]; then
-   cat output.log    
-fi
+#echo "Done running test. Result is $result"
+#ls -tral $root_path/crashdump.dmp
+#echo "looking for dump"
 
-if [ -f error.log ]; then
-   cat error.log    
-fi
-
-echo "Done running test. Result is $result"
-ls -tral $root_path/crashdump.dmp
-echo "looking for dump"
-
-find  $root_path/../../ -type f -iname crashdump.dmp 2>/dev/null
-date
-echo "done looking for dump"
+#find  $root_path/../../ -type f -iname crashdump.dmp 2>/dev/null
+#date
+#echo "done looking for dump"
 
 echo "looking for the log"
 find / -type f -iname the_force_engine_log.txt 2>/dev/null
 echo "done looking for the log"
-
+date
 exit 0
 
 $root_path/theforceengine > output.log 2>error.log
