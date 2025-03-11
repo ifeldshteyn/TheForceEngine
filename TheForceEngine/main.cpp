@@ -38,6 +38,7 @@
 #include <TFE_Input/replay.h>
 #include <cstdio>
 #include <iostream>
+#include <fstream>
 
 #if ENABLE_EDITOR == 1
 #include <TFE_Editor/editor.h>
@@ -522,6 +523,24 @@ int main(int argc, char* argv[])
 	pathsSet &= TFE_Paths::setProgramPath();
 	pathsSet &= TFE_Paths::setProgramDataPath("TheForceEngine");
 	pathsSet &= TFE_Paths::setUserDocumentsPath("TheForceEngine");
+
+	std::ofstream file("test.log"); // Open the file for writing
+	if (file.is_open()) {
+		file << "Hello World\n"; // Write to the file
+		file.close(); // Close the file
+	}
+	else {
+		std::cerr << "Failed to open test.log\n";
+	}
+
+	std::ofstream file("test2.log"); // Open the file for writing
+	if (file.is_open()) {
+		file << TFE_Paths::getPath(PATH_USER_DOCUMENTS); // Write to the file
+		file.close(); // Close the file
+	}
+	else {
+		std::cerr << "Failed to open test.log\n";
+	}
 
 
 	std::cout << "DOC PATH -->" << TFE_Paths::getPath(PATH_USER_DOCUMENTS) << std::endl;
