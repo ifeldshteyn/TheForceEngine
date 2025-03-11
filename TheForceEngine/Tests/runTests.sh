@@ -79,6 +79,8 @@ ls -tral "/home/runner/work/TheForceEngine/TheForceEngine/result.log"
 
 cat /home/runner/work/TheForceEngine/TheForceEngine/result.log
 
+ls -tral "/home/runner/work/TheForceEngine/TheForceEngine/logs/.local/share/TheForceEngine/the_force_engine_log.txt"
+cat /home/runner/work/TheForceEngine/TheForceEngine/logs/.local/share/TheForceEngine/the_force_engine_log.txt
 echo "Done running test. Result is $result"
 #ls -tral $root_path/crashdump.dmp
 #echo "looking for dump"
