@@ -89,6 +89,12 @@ find  $root_path/../../ -type f -iname crashdump.dmp 2>/dev/null
 date
 echo "done looking for dump"
 
+echo "looking for the log"
+find / -type f -iname the_force_engine_log.txt 2>/dev/null
+echo "done looking for the log"
+
+exit 0
+
 $root_path/theforceengine > output.log 2>error.log
 date
 if [ -f output.log ]; then

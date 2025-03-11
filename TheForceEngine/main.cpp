@@ -36,6 +36,7 @@
 #include <TFE_DarkForces/hud.h>
 #include <TFE_DarkForces/mission.h>
 #include <TFE_Input/replay.h>
+#include <cstdio>
 
 #if ENABLE_EDITOR == 1
 #include <TFE_Editor/editor.h>
@@ -47,6 +48,7 @@
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN 1
 #include <Windows.h>
+#include <iostream>
 #ifdef min
 #undef min
 #undef max
@@ -504,11 +506,23 @@ int main(int argc, char* argv[])
 	TFE_CrashHandler::setThreadExceptionHandlers();
 #endif
 
+	// Attach a console if one doesn't exist
+	if (AttachConsole(ATTACH_PARENT_PROCESS) || AllocConsole()) {
+		//freopen("CONOUT$", "w", stdout);
+		//freopen("CONOUT$", "w", stderr);
+		freopen("/dev/tty", "w", stdout);
+		freopen("/dev/stderr", "w", stderr);
+		std::cout.clear(); // Clear any error state
+	}
+
 	// Paths
 	bool pathsSet = true;
 	pathsSet &= TFE_Paths::setProgramPath();
 	pathsSet &= TFE_Paths::setProgramDataPath("TheForceEngine");
 	pathsSet &= TFE_Paths::setUserDocumentsPath("TheForceEngine");
+
+
+	std::cout << "DOC PATH -->" << TFE_Paths::getPath(PATH_USER_DOCUMENTS) << std::endl;
 	TFE_System::logOpen("the_force_engine_log.txt");
 	TFE_System::logWrite(LOG_MSG, "Main", "The Force Engine %s", c_gitVersion);
 	if (!pathsSet)
