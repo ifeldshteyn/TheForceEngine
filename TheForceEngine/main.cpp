@@ -39,6 +39,7 @@
 #include <cstdio>
 #include <iostream>
 #include <fstream>
+#include <string>
 
 #if ENABLE_EDITOR == 1
 #include <TFE_Editor/editor.h>
@@ -501,6 +502,15 @@ bool validatePath()
 	return TFE_Paths::hasPath(PATH_SOURCE_DATA);
 }
 
+std::string getExecutablePathFromArgs(const char* arg0) {
+	std::string fullPath(arg0);
+	size_t pos = fullPath.find_last_of("/\\");
+	if (pos != std::string::npos) {
+		return fullPath.substr(0, pos);
+	}
+	return "";
+}
+
 int main(int argc, char* argv[])
 {
 #if INSTALL_CRASH_HANDLER
@@ -518,6 +528,25 @@ int main(int argc, char* argv[])
 	freopen("/dev/tty", "w", stdout);
 	freopen("/dev/stderr", "w", stderr);
 #endif
+
+	if (argc > 0) {
+		std::string exePath = getExecutablePathFromArgs(argv[0]);
+
+		std::ofstream file3("/home/runner/work/TheForceEngine/TheForceEngine/result.log"); // Open the file for writing
+		if (file3.is_open()) {
+			file3 << "Hello World\n"; // Write to the file
+			file3 << TFE_Paths::getPath(PATH_USER_DOCUMENTS);
+			file3 << "\n";
+			file3.close(); // Close the file
+		}
+
+		std::cout << "Executable Path from Args: " << exePath << std::endl;
+	}
+	else {
+		std::cout << "No arguments provided." << std::endl;
+	}
+
+
 	// Paths
 	bool pathsSet = true;
 	pathsSet &= TFE_Paths::setProgramPath();

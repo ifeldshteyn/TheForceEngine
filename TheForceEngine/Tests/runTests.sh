@@ -75,6 +75,10 @@ $root_path/theforceengine
 result=$?
 date
 
+ls -tral "/home/runner/work/TheForceEngine/TheForceEngine/result.log"
+
+cat /home/runner/work/TheForceEngine/TheForceEngine/result.log
+
 echo "Done running test. Result is $result"
 #ls -tral $root_path/crashdump.dmp
 #echo "looking for dump"
