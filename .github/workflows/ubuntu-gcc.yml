@@ -37,6 +37,7 @@ jobs:
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
     - name: Tests
+      timeout-minutes: 10
       # Run TFE tests such as replay verification for any deltas
       run: |
         ulimit -c unlimited
@@ -50,8 +51,9 @@ jobs:
         
     - uses: actions/upload-artifact@master
       with:
-        name: crashdump.dmp
-        path: ${{github.workspace}}/crashdump.dmp
+        name: tfe_log
+        if: always()
+        path: /home/runner/work/TheForceEngine/TheForceEngine/logs/.local/share/TheForceEngine/the_force_engine_log.txt
         
       
         
