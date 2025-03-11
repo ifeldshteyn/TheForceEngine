@@ -506,16 +506,17 @@ int main(int argc, char* argv[])
 	TFE_CrashHandler::setProcessExceptionHandlers();
 	TFE_CrashHandler::setThreadExceptionHandlers();
 #endif
-
+#ifdef _WIN32
 	// Attach a console if one doesn't exist
 	if (AttachConsole(ATTACH_PARENT_PROCESS) || AllocConsole()) {
 		//freopen("CONOUT$", "w", stdout);
 		//freopen("CONOUT$", "w", stderr);
-		freopen("/dev/tty", "w", stdout);
-		freopen("/dev/stderr", "w", stderr);
 		std::cout.clear(); // Clear any error state
 	}
-
+#else
+	freopen("/dev/tty", "w", stdout);
+	freopen("/dev/stderr", "w", stderr);
+#endif
 	// Paths
 	bool pathsSet = true;
 	pathsSet &= TFE_Paths::setProgramPath();
