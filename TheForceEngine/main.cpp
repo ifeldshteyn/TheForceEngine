@@ -593,7 +593,7 @@ int main(int argc, char* argv[])
 		TFE_System::logWrite(LOG_ERROR, "Main", "Cannot set paths.");
 		return PROGRAM_ERROR;
 	}
-	TFE_System::logClose();
+
 	bool fileExist = fileExists("/home/runner/work/TheForceEngine/TheForceEngine/logs/.local/share/TheForceEngine/the_force_engine_log.txt");
 	std::ofstream file4("/home/runner/work/TheForceEngine/TheForceEngine/result.log", std::ios::app); // Open the file for writing
 	if (file4.is_open()) {
