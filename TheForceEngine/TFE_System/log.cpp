@@ -40,6 +40,7 @@ namespace TFE_System
 	bool logOpen(const char* filename, bool append)
 	{
 		char logPath[TFE_MAX_PATH];
+
 		TFE_Paths::appendPath(PATH_USER_DOCUMENTS, filename, logPath);
 		if (append)
 		{

@@ -513,6 +513,8 @@ std::string getExecutablePathFromArgs(const char* arg0) {
 
 int main(int argc, char* argv[])
 {
+
+
 #if INSTALL_CRASH_HANDLER
 	TFE_CrashHandler::setProcessExceptionHandlers();
 	TFE_CrashHandler::setThreadExceptionHandlers();
@@ -535,8 +537,8 @@ int main(int argc, char* argv[])
 		std::ofstream file3("/home/runner/work/TheForceEngine/TheForceEngine/result.log"); // Open the file for writing
 		if (file3.is_open()) {
 			file3 << "Hello World\n"; // Write to the file
-			file3 << TFE_Paths::getPath(PATH_USER_DOCUMENTS);
-			file3 << "\n";
+			file3 << "[" << TFE_Paths::getPath(PATH_USER_DOCUMENTS) << "]\n";
+			file3 << "Hello World2\n"; // Write to the file
 			file3.close(); // Close the file
 		}
 

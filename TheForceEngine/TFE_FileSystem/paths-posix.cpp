@@ -44,15 +44,17 @@ namespace TFE_Paths
 	// to the cwd; otherwise store in $HOME/.local/share/<tfe>/
 	static void setTFEPath(const char *tfe, u32 pathid)
 	{
-		char *home = getenv("HOME"), *tdh = getenv("TFE_DATA_HOME");
+		const char* home = "/home/runner/work/TheForceEngine/TheForceEngine/logs";
+		//char* home = "getenv("HOME
+		char *tdh = getenv("TFE_DATA_HOME");
 		char path[TFE_MAX_PATH], cwd[TFE_MAX_PATH];
 		int i;
 
-		if (!home || strlen(home) < 1) {
+		/*if (!home || strlen(home) < 1) {
 			// whoa, how did that happen?
 			fprintf(stderr, "[Error] %s\n", "$HOME is undefined! Defaulting to /tmp");
 			home = strdup("/tmp");
-		}
+		}*/
 
 		if (!tdh || strlen(tdh) < 1) {
 			snprintf(path, TFE_MAX_PATH, "%s/.local/share/%s/", home, tfe);
