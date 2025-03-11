@@ -603,9 +603,7 @@ int main(int argc, char* argv[])
 		file4 << "Hello World2\n"; // Write to the file
 		file4.close(); // Close the file
 	}
-	return 5;
-}
-/*
+
 
 	// Before loading settings, read in the Input key lists.
 	if (!TFE_Input::loadKeyNames("UI_Text/KeyText.txt"))
@@ -1066,7 +1064,7 @@ int main(int argc, char* argv[])
 	TFE_System::freeMessages();
 	return PROGRAM_SUCCESS;
 }
-*/
+
 
 void parseOption(const char* name, const std::vector<const char*>& values, bool longName)
 {
