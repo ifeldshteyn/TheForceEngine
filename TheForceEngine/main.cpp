@@ -533,7 +533,7 @@ int main(int argc, char* argv[])
 		return PROGRAM_ERROR;
 	}
 	TFE_System::logClose();
-	return 0;
+	return 5;
 }
 /*
 

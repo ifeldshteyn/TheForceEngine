@@ -75,7 +75,7 @@ $root_path/theforceengine
 result=$?
 date
 
-#echo "Done running test. Result is $result"
+echo "Done running test. Result is $result"
 #ls -tral $root_path/crashdump.dmp
 #echo "looking for dump"
 
