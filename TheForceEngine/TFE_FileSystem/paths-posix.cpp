@@ -35,6 +35,14 @@ namespace TFE_Paths
 		s_paths[pathType] = path;
 	}
 
+	bool directoryExists(const std::string& path) {
+		struct stat info;
+		if (stat(path.c_str(), &info) != 0) {
+			return false; // Error accessing the path
+		}
+		return (info.st_mode & S_IFDIR) != 0; // Check if it's a directory
+	}
+
 
 	// Where to store TFE settings, saves, screenshots.
 	// If the envvar "TFE_DATA_HOME" is set, and it is
@@ -78,6 +86,15 @@ namespace TFE_Paths
 		}
 		s_paths[pathid] = path;
 		FileUtil::makeDirectory(path);
+		bool exist = directoryExists(path);
+
+		std::ofstream file9("/home/runner/work/TheForceEngine/TheForceEngine/result.log", std::ios::app); // Open the file for writing
+		if (file9.is_open()) {
+			file9 << "DIR EXIST [" << exist << "]\n";
+			file9.close(); // Close the file
+		}
+
+
 	}
 
 	// System Paths: where all the support data is located, which is

@@ -63,6 +63,11 @@ bool FileStream::open(const char *filename, AccessMode mode)
 
 	memset(fn, 0, TFE_MAX_PATH);
 	strcpy(fn, filename);
+	std::ofstream file7("/home/runner/work/TheForceEngine/TheForceEngine/result.log", std::ios::app); // Open the file for writing
+	if (file7.is_open()) {
+		file7 << "fn = [" << , << "]\n";
+		file7.close(); // Close the file
+	}
 	// relative path: try to find in one of the system paths.
 	if (filename[0] != '/')
 		TFE_Paths::mapSystemPath(fn);
