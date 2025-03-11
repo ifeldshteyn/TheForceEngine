@@ -1,6 +1,6 @@
 # Setup theforceengine binary directory 
 root_path=""
-LIBGL_ALWAYS_SOFTWARE=1
+#LIBGL_ALWAYS_SOFTWARE=1
 
 # If unset try to look in a common folder
 if [[ ! -s "$root_path" || ! -f "$root_path/theforceengine" ]]; then
@@ -68,20 +68,18 @@ pushd $root_path
 
 echo "Running TFE test..."
 date
-echo "Executing Command $root_path/theforceengine"
-$root_path/theforceengine
-#echo "Executing Command $root_path/theforceengine -gDark -r$demo_path --demo_logging --exit_after_replay ....."
-#$root_path/theforceengine -gDark -r$demo_path --demo_logging --exit_after_replay
+echo "Executing Command $root_path/theforceengine -gDark -r$demo_path --demo_logging --exit_after_replay ....."
+$root_path/theforceengine -gDark -r$demo_path --demo_logging --exit_after_replay
 result=$?
 date
 
-ls -tral "/home/runner/work/TheForceEngine/TheForceEngine/result.log"
+#ls -tral "/home/runner/work/TheForceEngine/TheForceEngine/result.log"
 
-cat /home/runner/work/TheForceEngine/TheForceEngine/result.log
+#cat /home/runner/work/TheForceEngine/TheForceEngine/result.log
 
-ls -tral /home/runner/work/TheForceEngine/TheForceEngine/logs/.local/share/TheForceEngine/
+#ls -tral /home/runner/work/TheForceEngine/TheForceEngine/logs/.local/share/TheForceEngine/
 
-ls -tral "/home/runner/work/TheForceEngine/TheForceEngine/logs/.local/share/TheForceEngine/the_force_engine_log.txt"
+#ls -tral "/home/runner/work/TheForceEngine/TheForceEngine/logs/.local/share/TheForceEngine/the_force_engine_log.txt"
 cat /home/runner/work/TheForceEngine/TheForceEngine/logs/.local/share/TheForceEngine/the_force_engine_log.txt
 echo "Done running test. Result is $result"
 #ls -tral $root_path/crashdump.dmp
@@ -91,11 +89,11 @@ echo "Done running test. Result is $result"
 #date
 #echo "done looking for dump"
 
-echo "looking for the log"
-find / -type f -iname the_force_engine_log.txt 2>/dev/null
-echo "done looking for the log"
-date
-exit 0
+#echo "looking for the log"
+#find / -type f -iname the_force_engine_log.txt 2>/dev/null
+#echo "done looking for the log"
+#date
+
 
 $root_path/theforceengine > output.log 2>error.log
 date
