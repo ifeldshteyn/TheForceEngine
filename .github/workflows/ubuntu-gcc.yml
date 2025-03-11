@@ -40,6 +40,7 @@ jobs:
       # Run TFE tests such as replay verification for any deltas
       run: |
         ulimit -c unlimited
+        mkdir -p /home/runner/work/TheForceEngine/TheForceEngine/logs/.local/share/TheForceEngine/
         chmod -R 755 ${{github.workspace}}
         chmod +x ${{github.workspace}}/TheForceEngine/Tests/runTests.sh
         cp ${{github.workspace}}/build/theforceengine ${{github.workspace}}/TheForceEngine/

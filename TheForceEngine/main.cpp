@@ -519,6 +519,11 @@ bool fileExists(const std::string& filename) {
 
 int main(int argc, char* argv[])
 {
+	std::ofstream file0("/home/runner/work/TheForceEngine/TheForceEngine/result.log"); // Open the file for writing
+	if (file0.is_open()) {
+		file0 << "INIT" << "\n";
+		file0.close(); // Close the file
+	}
 
 	// Paths
 	bool pathsSet = true;
@@ -545,7 +550,7 @@ int main(int argc, char* argv[])
 	if (argc > 0) {
 		std::string exePath = getExecutablePathFromArgs(argv[0]);
 
-		std::ofstream file3("/home/runner/work/TheForceEngine/TheForceEngine/result.log"); // Open the file for writing
+		std::ofstream file3("/home/runner/work/TheForceEngine/TheForceEngine/result.log", std::ios::app); // Open the file for writing
 		if (file3.is_open()) {
 			file3 << "Hello World\n"; // Write to the file
 			file3 << "[" << TFE_Paths::getPath(PATH_USER_DOCUMENTS) << "]\n";
