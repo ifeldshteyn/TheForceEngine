@@ -54,7 +54,7 @@ jobs:
         if: always()
         path: /home/runner/work/TheForceEngine/TheForceEngine/logs/.local/share/TheForceEngine/the_force_engine_log.txt
         
-   update:
+  update:
     runs-on: ubuntu-latest
     steps:    
     - uses: actions/upload-artifact@master
