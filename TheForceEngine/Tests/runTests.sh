@@ -37,7 +37,7 @@ fi
 demo_path=""
 
 if [[ ! -s "$demo_path" || ! -f "$demo_path" ]]; then
-    demo_path="$(dirname "$(realpath "$0")")"/Replays/base_test.demo
+    demo_path="$(dirname "$(realpath "$0")")"/Replays/base_test2.demo
     if [ -f $demo_path ]; then
 		echo "Found the demo at $demo_path"
 	else
@@ -50,7 +50,7 @@ fi
 demo_log_path=""
 
 if [[ ! -s "$demo_log_path" || ! -f "$demo_log_path" ]]; then
-    demo_log_path="$(dirname "$(realpath "$0")")"/Replays/base_replay_log.txt
+    demo_log_path="$(dirname "$(realpath "$0")")"/Replays/base_replay_log2.txt
     if [ -f $demo_log_path ]; then
 		echo "Found the demo log at $demo_log_path"
 	else

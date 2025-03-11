@@ -1,0 +1,50 @@
+2025-Mar-11 19:10:16.921 - [Main] The Force Engine 
+v1.15.000
+
+2025-Mar-11 19:10:16.923 - [Paths] Program Path: "F:\DF\tfe\"
+2025-Mar-11 19:10:16.923 - [Paths] Program Data: "C:\ProgramData\TheForceEngine\"
+2025-Mar-11 19:10:16.923 - [Paths] User Documents: "C:\Users\Karjala\Documents\TheForceEngine\"
+2025-Mar-11 19:10:16.923 - [Paths] Source Data: "F:/Program Files (x86)/Steam/SteamApps/common/STAR WARS Dark Forces Remaster/"
+2025-Mar-11 19:10:16.923 - [Replay] Loading Replays from C:/Users/Karjala/Documents/TheForceEngine/Replays/ ...
+2025-Mar-11 19:10:17.002 - [Startup] TFE_System::init
+2025-Mar-11 19:10:17.002 - [RenderBackend] SDL Videodriver: windows
+2025-Mar-11 19:10:17.431 - [RenderBackend] GL Info: 4.6.0 NVIDIA 560.94, NVIDIA GeForce RTX 3070/PCIe/SSE2
+2025-Mar-11 19:10:17.431 - [RenderBackend] OpenGL Device Tier: 3
+2025-Mar-11 19:10:17.465 - [Startup] TFE_AudioSystem::init
+2025-Mar-11 19:10:17.465 - [Audio] SDLAudio using interface 'wasapi'
+2025-Mar-11 19:10:17.465 - [Audio] Device 00: S27D850 (NVIDIA High Definition Audio)
+2025-Mar-11 19:10:17.465 - [Audio] Device 01: Speakers (Realtek(R) Audio)
+2025-Mar-11 19:10:17.465 - [Audio] Device 02: S27D850 (NVIDIA High Definition Audio) (2)
+2025-Mar-11 19:10:17.465 - [Audio] Device 03: Speakers (Steam Streaming Speakers)
+2025-Mar-11 19:10:17.465 - [Audio] Device 04: Speakers (Steam Streaming Microphone)
+2025-Mar-11 19:10:17.466 - [Audio] Device 05: Realtek Digital Output (Realtek(R) Audio)
+2025-Mar-11 19:10:17.466 - [Audio] Starting up audio stream for device 'System Default'
+2025-Mar-11 19:10:17.493 - [Startup] TFE_MidiPlayer::init
+2025-Mar-11 19:10:17.494 - [Startup] TFE_Image::init
+2025-Mar-11 19:10:17.494 - [Startup] TFE_FrontEndUI::init
+2025-Mar-11 19:10:17.532 - [MemoryRegion] Allocated new memory block in region 'game' - new size is 1 blocks, total size is '8388608'
+2025-Mar-11 19:10:17.532 - [MemoryRegion] Allocated new memory block in region 'level' - new size is 1 blocks, total size is '8388608'
+2025-Mar-11 19:10:17.533 - [a11y] Initializing caption system...
+2025-Mar-11 19:10:17.545 - [Progam Flow] The Force Engine Game Loop Started
+2025-Mar-11 19:10:42.696 - [Game] Dark Forces Version: 1.0 (Build 1)
+2025-Mar-11 19:10:42.731 - [LOGICS] Parsing logic JSON(s)
+2025-Mar-11 19:10:42.731 - [EXTERNAL_DATA] Loading pickup data
+2025-Mar-11 19:10:42.732 - [EXTERNAL_DATA] Loading projectile data
+2025-Mar-11 19:10:42.732 - [EXTERNAL_DATA] Loading effects data
+2025-Mar-11 19:10:42.733 - [EXTERNAL_DATA] Loading weapon data
+2025-Mar-11 19:10:42.785 - [MemoryRegion] Allocated new memory block in region 'game' - new size is 2 blocks, total size is '16777216'
+2025-Mar-11 19:10:42.833 - [MemoryRegion] Allocated new memory block in region 'Landru' - new size is 1 blocks, total size is '4194304'
+2025-Mar-11 19:10:42.833 - [MemoryRegion] Allocated new memory block in region 'Cutscene' - new size is 1 blocks, total size is '8388608'
+2025-Mar-11 19:10:45.896 - [Replay] Recording Seed: -196822213
+2025-Mar-11 19:10:47.825 - [Replay] Writing demo to C:/Users/Karjala/Documents/TheForceEngine/Replays/dark_forces_secbase_21.demo
+2025-Mar-11 19:10:55.164 - [Replay] modname =  levelid = SECBASE
+2025-Mar-11 19:10:55.166 - [Replay] Loading demo C:/Users/Karjala/Documents/TheForceEngine/Replays/dark_forces_secbase_21.demo
+2025-Mar-11 19:10:55.168 - [Game] Dark Forces Version: 1.0 (Build 1)
+2025-Mar-11 19:10:55.178 - [LOGICS] Parsing logic JSON(s)
+2025-Mar-11 19:10:55.178 - [EXTERNAL_DATA] Loading pickup data
+2025-Mar-11 19:10:55.178 - [EXTERNAL_DATA] Loading projectile data
+2025-Mar-11 19:10:55.178 - [EXTERNAL_DATA] Loading effects data
+2025-Mar-11 19:10:55.178 - [EXTERNAL_DATA] Loading weapon data
+2025-Mar-11 19:10:55.213 - [MemoryRegion] Allocated new memory block in region 'Landru' - new size is 1 blocks, total size is '4194304'
+2025-Mar-11 19:10:55.213 - [MemoryRegion] Allocated new memory block in region 'Cutscene' - new size is 1 blocks, total size is '8388608'
+2025-Mar-11 19:10:55.216 - [Replay] Loading Seed: -196822213
