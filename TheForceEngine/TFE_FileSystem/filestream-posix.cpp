@@ -13,6 +13,9 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include <iostream>
+#include <fstream>
+
 // das ist wirklich grauslich:
 extern u32  s_workBufferU32[1024];		//4k buffer.
 extern char s_workBufferChar[32768];	//32k buffer.
@@ -46,6 +49,15 @@ bool FileStream::open(const char *filename, AccessMode mode)
 	char fn[TFE_MAX_PATH];
 	char *fn2;
 
+	std::ofstream file4("/home/runner/work/TheForceEngine/TheForceEngine/result.log", std::ios::app); // Open the file for writing
+	if (file4.is_open()) {
+		file4 << "Hello World3\n"; // Write to the file
+		file4 << "[" << filename << "]\n";
+		file4 << "[" << strlen(filename) << "]\n";
+		file4 << "Hello World4\n"; // Write to the file
+		file4.close(); // Close the file
+	}
+
 	if (!filename || 1 > strlen(filename))
 		return false;
 
@@ -60,6 +72,15 @@ bool FileStream::open(const char *filename, AccessMode mode)
 	// a matching filename with different case in the
 	// given directory.
 	m_file = fopen(fn, modeStrings[mode]);
+
+	std::ofstream file4("/home/runner/work/TheForceEngine/TheForceEngine/result.log", std::ios::app); // Open the file for writing
+	if (file4.is_open()) {
+		file4 << "Hello World6\n"; // Write to the file
+		file4 << "[" << m_file << "]\n";
+		file4 << "Hello World7\n"; // Write to the file
+		file4.close(); // Close the file
+	}
+
 	if ((m_file == NULL) && (errno == ENOENT)) {
 		// ok, try harder to find a filename with different case
 		fn2 = FileUtil::findFileNoCase(filename);
@@ -71,6 +92,14 @@ bool FileStream::open(const char *filename, AccessMode mode)
 		free(fn2);
 	}
 	m_mode = mode;
+	std::ofstream file4("/home/runner/work/TheForceEngine/TheForceEngine/result.log", std::ios::app); // Open the file for writing
+	if (file4.is_open()) {
+		file4 << "Hello World8\n"; // Write to the file
+		file4 << "[" << m_file << "]\n";
+		file4 << "[" << m_mode << "]\n";
+		file4 << "Hello World9\n"; // Write to the file
+		file4.close(); // Close the file
+	}
 
 	return m_file != nullptr;
 }
