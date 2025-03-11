@@ -533,10 +533,10 @@ int main(int argc, char* argv[])
 		std::cerr << "Failed to open test.log\n";
 	}
 
-	std::ofstream file("test2.log"); // Open the file for writing
-	if (file.is_open()) {
-		file << TFE_Paths::getPath(PATH_USER_DOCUMENTS); // Write to the file
-		file.close(); // Close the file
+	std::ofstream file2("test2.log"); // Open the file for writing
+	if (file2.is_open()) {
+		file2 << TFE_Paths::getPath(PATH_USER_DOCUMENTS); // Write to the file
+		file2.close(); // Close the file
 	}
 	else {
 		std::cerr << "Failed to open test.log\n";
