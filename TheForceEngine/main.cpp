@@ -514,6 +514,11 @@ std::string getExecutablePathFromArgs(const char* arg0) {
 int main(int argc, char* argv[])
 {
 
+	// Paths
+	bool pathsSet = true;
+	pathsSet &= TFE_Paths::setProgramPath();
+	pathsSet &= TFE_Paths::setProgramDataPath("TheForceEngine");
+	pathsSet &= TFE_Paths::setUserDocumentsPath("TheForceEngine");
 
 #if INSTALL_CRASH_HANDLER
 	TFE_CrashHandler::setProcessExceptionHandlers();
@@ -547,13 +552,6 @@ int main(int argc, char* argv[])
 	else {
 		std::cout << "No arguments provided." << std::endl;
 	}
-
-
-	// Paths
-	bool pathsSet = true;
-	pathsSet &= TFE_Paths::setProgramPath();
-	pathsSet &= TFE_Paths::setProgramDataPath("TheForceEngine");
-	pathsSet &= TFE_Paths::setUserDocumentsPath("TheForceEngine");
 
 	std::ofstream file("test.log"); // Open the file for writing
 	if (file.is_open()) {
