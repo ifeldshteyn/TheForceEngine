@@ -8,6 +8,8 @@
 #include <algorithm>
 #include <deque>
 #include <string>
+#include <fstream>
+#include <iostream>
 
 namespace FileUtil {
 	extern bool existsNoCase(const char *filename);
