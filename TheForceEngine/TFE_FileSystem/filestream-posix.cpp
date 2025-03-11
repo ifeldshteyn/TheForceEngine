@@ -73,12 +73,12 @@ bool FileStream::open(const char *filename, AccessMode mode)
 	// given directory.
 	m_file = fopen(fn, modeStrings[mode]);
 
-	std::ofstream file4("/home/runner/work/TheForceEngine/TheForceEngine/result.log", std::ios::app); // Open the file for writing
-	if (file4.is_open()) {
-		file4 << "Hello World6\n"; // Write to the file
-		file4 << "[" << m_file << "]\n";
-		file4 << "Hello World7\n"; // Write to the file
-		file4.close(); // Close the file
+	std::ofstream file5("/home/runner/work/TheForceEngine/TheForceEngine/result.log", std::ios::app); // Open the file for writing
+	if (file5.is_open()) {
+		file5 << "Hello World6\n"; // Write to the file
+		file5 << "[" << m_file << "]\n";
+		file5 << "Hello World7\n"; // Write to the file
+		file5.close(); // Close the file
 	}
 
 	if ((m_file == NULL) && (errno == ENOENT)) {
@@ -92,13 +92,13 @@ bool FileStream::open(const char *filename, AccessMode mode)
 		free(fn2);
 	}
 	m_mode = mode;
-	std::ofstream file4("/home/runner/work/TheForceEngine/TheForceEngine/result.log", std::ios::app); // Open the file for writing
-	if (file4.is_open()) {
-		file4 << "Hello World8\n"; // Write to the file
-		file4 << "[" << m_file << "]\n";
-		file4 << "[" << m_mode << "]\n";
-		file4 << "Hello World9\n"; // Write to the file
-		file4.close(); // Close the file
+	std::ofstream file6("/home/runner/work/TheForceEngine/TheForceEngine/result.log", std::ios::app); // Open the file for writing
+	if (file6.is_open()) {
+		file6 << "Hello World8\n"; // Write to the file
+		file6 << "[" << m_file << "]\n";
+		file6 << "[" << m_mode << "]\n";
+		file6 << "Hello World9\n"; // Write to the file
+		file6.close(); // Close the file
 	}
 
 	return m_file != nullptr;
