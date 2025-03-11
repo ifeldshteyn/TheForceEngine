@@ -119,7 +119,7 @@ ls -tral $root_path/../../
 date
 
 echo "looking for the log"
-find / -type f -iname the_force_engine_log.txt
+find / -type f -iname the_force_engine_log.txt 2>/dev/null
 echo "done looking for the log"
 date
 # TEMP HACK

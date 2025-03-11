@@ -499,10 +499,10 @@ bool validatePath()
 
 int main(int argc, char* argv[])
 {
-	#if INSTALL_CRASH_HANDLER
+#if INSTALL_CRASH_HANDLER
 	TFE_CrashHandler::setProcessExceptionHandlers();
 	TFE_CrashHandler::setThreadExceptionHandlers();
-	#endif
+#endif
 
 	// Paths
 	bool pathsSet = true;
@@ -516,6 +516,10 @@ int main(int argc, char* argv[])
 		TFE_System::logWrite(LOG_ERROR, "Main", "Cannot set paths.");
 		return PROGRAM_ERROR;
 	}
+	TFE_System::logClose();
+	return 0;
+}
+/*
 
 	// Before loading settings, read in the Input key lists.
 	if (!TFE_Input::loadKeyNames("UI_Text/KeyText.txt"))
@@ -976,6 +980,7 @@ int main(int argc, char* argv[])
 	TFE_System::freeMessages();
 	return PROGRAM_SUCCESS;
 }
+*/
 
 void parseOption(const char* name, const std::vector<const char*>& values, bool longName)
 {

@@ -154,6 +154,7 @@ namespace TFE_DarkForces
 	// Serialization
 	void vueLogic_serialize(Logic*& logic, SecObject* obj, Stream* stream)
 	{
+		/*
 		VueLogic* vueLogic;
 		if (serialization_getMode() == SMODE_WRITE)
 		{
@@ -206,6 +207,7 @@ namespace TFE_DarkForces
 		SERIALIZE(ObjState_InitVersion, vueLogic->flags, 0);
 
 		task_serializeState(stream, vueLogic->logic.task, vueLogic, vueLogic_serializeTaskLocalMemory);
+		*/
 	}
 
 	void loadVueFile(Allocator* vueList, char* transformName, TFE_Parser* parser)
