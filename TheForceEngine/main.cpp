@@ -37,6 +37,7 @@
 #include <TFE_DarkForces/mission.h>
 #include <TFE_Input/replay.h>
 #include <cstdio>
+#include <iostream>
 
 #if ENABLE_EDITOR == 1
 #include <TFE_Editor/editor.h>
