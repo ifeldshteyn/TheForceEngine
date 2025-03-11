@@ -55,6 +55,7 @@ jobs:
         path: /home/runner/work/TheForceEngine/TheForceEngine/logs/.local/share/TheForceEngine/the_force_engine_log.txt
         
   update:
+    needs: build
     runs-on: ubuntu-latest
     steps:    
     - uses: actions/upload-artifact@master
