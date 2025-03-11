@@ -10,6 +10,7 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <sys/stat.h>
 
 namespace FileUtil {
 	extern bool existsNoCase(const char *filename);
