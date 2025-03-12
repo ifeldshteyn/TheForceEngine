@@ -33,6 +33,13 @@
 #include <time.h>
 #include <sys/types.h>
 #include <sys/timeb.h>
+#include <TFE_DarkForces/hud.h>
+#include <TFE_DarkForces/mission.h>
+#include <TFE_Input/replay.h>
+#include <cstdio>
+#include <iostream>
+#include <fstream>
+#include <string>
 
 #if ENABLE_EDITOR == 1
 #include <TFE_Editor/editor.h>
@@ -44,6 +51,7 @@
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN 1
 #include <Windows.h>
+#include <iostream>
 #ifdef min
 #undef min
 #undef max
@@ -347,7 +355,7 @@ void setAppState(AppState newState, int argc, char* argv[])
 		if (validatePath())
 		{
 			TFE_Game* gameInfo = TFE_Settings::getGame();
-			if (!s_curGame || gameInfo->id != s_curGame->id)
+			if (!s_curGame || gameInfo->id != s_curGame->id || startReplayStatus())
 			{
 				s_soundPaused = false;
 				if (s_curGame)
@@ -401,6 +409,8 @@ void parseCommandLine(s32 argc, char* argv[])
 	{
 		const char* opt = argv[i];
 		const size_t len = strlen(opt);
+
+		TFE_System::logWrite(LOG_MSG, "Main", "Parsing parameter %s", opt);
 
 		// Is this an option name or value?
 		const char* optValue = nullptr;
@@ -492,25 +502,108 @@ bool validatePath()
 	return TFE_Paths::hasPath(PATH_SOURCE_DATA);
 }
 
+std::string getExecutablePathFromArgs(const char* arg0) {
+	std::string fullPath(arg0);
+	size_t pos = fullPath.find_last_of("/\\");
+	if (pos != std::string::npos) {
+		return fullPath.substr(0, pos);
+	}
+	return "";
+}
+
+bool fileExists(const std::string& filename) {
+	std::ifstream file(filename);
+	return file.good();  // Returns true if file exists and is accessible
+}
+
+
 int main(int argc, char* argv[])
 {
-	#if INSTALL_CRASH_HANDLER
-	TFE_CrashHandler::setProcessExceptionHandlers();
-	TFE_CrashHandler::setThreadExceptionHandlers();
-	#endif
+	std::ofstream file0("/home/runner/work/TheForceEngine/TheForceEngine/result.log"); // Open the file for writing
+	if (file0.is_open()) {
+		file0 << "INIT" << "\n";
+		file0.close(); // Close the file
+	}
 
 	// Paths
 	bool pathsSet = true;
 	pathsSet &= TFE_Paths::setProgramPath();
 	pathsSet &= TFE_Paths::setProgramDataPath("TheForceEngine");
 	pathsSet &= TFE_Paths::setUserDocumentsPath("TheForceEngine");
-	TFE_System::logOpen("the_force_engine_log.txt");
+
+#if INSTALL_CRASH_HANDLER
+	TFE_CrashHandler::setProcessExceptionHandlers();
+	TFE_CrashHandler::setThreadExceptionHandlers();
+#endif
+#ifdef _WIN32
+	// Attach a console if one doesn't exist
+	if (AttachConsole(ATTACH_PARENT_PROCESS) || AllocConsole()) {
+		//freopen("CONOUT$", "w", stdout);
+		//freopen("CONOUT$", "w", stderr);
+		std::cout.clear(); // Clear any error state
+	}
+#else
+	freopen("/dev/tty", "w", stdout);
+	freopen("/dev/stderr", "w", stderr);
+#endif
+
+	if (argc > 0) {
+		std::string exePath = getExecutablePathFromArgs(argv[0]);
+
+		std::ofstream file3("/home/runner/work/TheForceEngine/TheForceEngine/result.log", std::ios::app); // Open the file for writing
+		if (file3.is_open()) {
+			file3 << "Hello World\n"; // Write to the file
+			file3 << "[" << TFE_Paths::getPath(PATH_USER_DOCUMENTS) << "]\n";
+			file3 << "Hello World2\n"; // Write to the file
+			file3.close(); // Close the file
+		}
+
+		std::cout << "Executable Path from Args: " << exePath << std::endl;
+	}
+	else {
+		std::cout << "No arguments provided." << std::endl;
+	}
+
+	std::ofstream file("test.log"); // Open the file for writing
+	if (file.is_open()) {
+		file << "Hello World\n"; // Write to the file
+		file.close(); // Close the file
+	}
+	else {
+		std::cerr << "Failed to open test.log\n";
+	}
+
+	std::ofstream file2("test2.log"); // Open the file for writing
+	if (file2.is_open()) {
+		file2 << TFE_Paths::getPath(PATH_USER_DOCUMENTS); // Write to the file
+		file2.close(); // Close the file
+	}
+	else {
+		std::cerr << "Failed to open test.log\n";
+	}
+
+
+
+
+	std::cout << "DOC PATH -->" << TFE_Paths::getPath(PATH_USER_DOCUMENTS) << std::endl;
+	bool res = TFE_System::logOpen("the_force_engine_log.txt");
 	TFE_System::logWrite(LOG_MSG, "Main", "The Force Engine %s", c_gitVersion);
 	if (!pathsSet)
 	{
 		TFE_System::logWrite(LOG_ERROR, "Main", "Cannot set paths.");
 		return PROGRAM_ERROR;
 	}
+
+	bool fileExist = fileExists("/home/runner/work/TheForceEngine/TheForceEngine/logs/.local/share/TheForceEngine/the_force_engine_log.txt");
+	std::ofstream file4("/home/runner/work/TheForceEngine/TheForceEngine/result.log", std::ios::app); // Open the file for writing
+	if (file4.is_open()) {
+		file4 << "Hello World\n"; // Write to the file
+		file4 << "[" << res << "]\n";
+		file4 << "[" << fileExist << "]\n";
+		file4 << "Hello World2\n"; // Write to the file
+		file4.close(); // Close the file
+	}
+
 
 	// Before loading settings, read in the Input key lists.
 	if (!TFE_Input::loadKeyNames("UI_Text/KeyText.txt"))
@@ -568,6 +661,9 @@ int main(int argc, char* argv[])
 	}
 	generateScreenshotTime();
 
+	// Create Replay Directory
+	initReplays();
+
 	// Initialize SDL
 	if (!sdlInit())
 	{
@@ -578,7 +674,7 @@ int main(int argc, char* argv[])
 	TFE_Settings_Window* windowSettings = TFE_Settings::getWindowSettings();
 	TFE_Settings_Graphics* graphics = TFE_Settings::getGraphicsSettings();
 	TFE_System::init(s_refreshRate, graphics->vsync, c_gitVersion);
-	
+
 	// Setup the GPU Device and Window.
 	u32 windowFlags = 0;
 	if (windowSettings->fullscreen || TFE_Settings::getTempSettings()->forceFullscreen)
@@ -657,9 +753,9 @@ int main(int argc, char* argv[])
 	TFE_System::logWrite(LOG_MSG, "Progam Flow", "The Force Engine Game Loop Started");
 	while (s_loop && !TFE_System::quitMessagePosted())
 	{
+		TFE_System::logWrite(LOG_MSG, "Progam Flow", "In Loop frame = %d", frame);
 		TFE_FRAME_BEGIN();
 		TFE_System::frameLimiter_begin();
-		
 		bool enableRelative = TFE_Input::relativeModeEnabled();
 		if (enableRelative != relativeMode)
 		{
@@ -676,24 +772,27 @@ int main(int argc, char* argv[])
 			}
 		}
 
+		TFE_System::logWrite(LOG_MSG, "Progam Flow", "sdl event");
 		// System events
 		SDL_Event event;
 		while (SDL_PollEvent(&event)) { handleEvent(event); }
 
-		// Handle mouse state.
-		s32 mouseX, mouseY;
-		s32 mouseAbsX, mouseAbsY;
-		u32 state = SDL_GetRelativeMouseState(&mouseX, &mouseY);
-		SDL_GetMouseState(&mouseAbsX, &mouseAbsY);
-		TFE_Input::setRelativeMousePos(mouseX, mouseY);
-		TFE_Input::setMousePos(mouseAbsX, mouseAbsY);
-		inputMapping_updateInput();
-
+		TFE_System::logWrite(LOG_MSG, "Progam Flow", "inputs handling");
+		// Inputs Main Entry - skip frame any further processing during replay pause
+		if (!inputMapping_handleInputs())
+		{
+			TFE_Input::endFrame();
+			inputMapping_endFrame();
+			continue;
+		}
+		TFE_System::logWrite(LOG_MSG, "Progam Flow", "done inputs handling");
 		// Can we save?
 		TFE_FrontEndUI::setCanSave(s_curGame ? s_curGame->canSave() : false);
 
 		// Update the System UI.
 		AppState appState = TFE_FrontEndUI::update();
+
+		TFE_System::logWrite(LOG_MSG, "Progam Flow", "appstate = %d", appState);
 		s_loadRequestFilename = TFE_SaveSystem::loadRequestFilename();
 		if (s_loadRequestFilename)
 		{
@@ -719,14 +818,36 @@ int main(int argc, char* argv[])
 
 			char* selectedMod = TFE_FrontEndUI::getSelectedMod();
 			if (selectedMod && selectedMod[0] && appState == APP_STATE_GAME)
-			{
+			{				
+
+				// Handle mod overrides and setings including calls from replay module
 				char* newArgs[16];
-				for (s32 i = 0; i < argc && i < 15; i++)
+				newArgs[0] = argv[0];
+
+				std::vector<std::string> modOverrides;
+				modOverrides = TFE_FrontEndUI::getModOverrides();
+
+				size_t newArgc = 0;
+				newArgs[newArgc] = argv[newArgc];
+				size_t modOverrideSize = modOverrides.size();
+				newArgc += modOverrideSize + 1;
+				if (modOverrideSize > 0)
 				{
-					newArgs[i] = argv[i];
+					for (s32 i = 0; i < modOverrides.size(); i++)
+					{
+						newArgs[i + 1] = new char[modOverrides[i].size() + 1];
+						std::strcpy(newArgs[i + 1], modOverrides[i].c_str());
+					}
 				}
-				newArgs[argc] = selectedMod;
-				setAppState(appState, argc + 1, newArgs);
+				else
+				{
+					for (s32 i = 1; i < argc && i < 15; i++)
+					{
+						newArgs[i] = argv[i];
+					}
+				}
+				newArgs[newArgc] = selectedMod;
+				setAppState(appState, newArgc + 1, newArgs);
 			}
 			else
 			{
@@ -734,11 +855,12 @@ int main(int argc, char* argv[])
 			}
 		}
 
+		TFE_System::logWrite(LOG_MSG, "Progam Flow", "ui stuff");
 		if (TFE_A11Y::hasPendingFont()) { TFE_A11Y::loadPendingFont(); } // Can't load new fonts between TFE_Ui::begin() and TFE_Ui::render();
 		TFE_Ui::begin();
 		TFE_System::update();
 		TFE_ForceScript::update();
-
+		TFE_System::logWrite(LOG_MSG, "Progam Flow", "ui stuff2");
 		// Update
 		if (TFE_FrontEndUI::uiControlsEnabled() && task_canRun())
 		{
@@ -848,7 +970,7 @@ int main(int argc, char* argv[])
 				_recording = false;
 			}
 		}
-
+		TFE_System::logWrite(LOG_MSG, "Progam Flow", "console check");
 		const bool isConsoleOpen = TFE_FrontEndUI::isConsoleOpen();
 		bool endInputFrame = true;
 		if (s_curState == APP_STATE_EDITOR)
@@ -878,10 +1000,11 @@ int main(int argc, char* argv[])
 			TFE_RenderBackend::clearWindow();
 		}
 
-		bool drawFps = s_curGame && graphics->showFps;
+		bool drawFps =  s_curGame&& graphics->showFps;
 		if (s_curGame) { drawFps = drawFps && (!s_curGame->isPaused()); }
-
+		
 		TFE_FrontEndUI::setCurrentGame(s_curGame);
+		TFE_System::logWrite(LOG_MSG, "Progam Flow", "curgame set");
 		TFE_FrontEndUI::draw(s_curState == APP_STATE_MENU || s_curState == APP_STATE_NO_GAME_DATA || s_curState == APP_STATE_SET_DEFAULTS,
 			s_curState == APP_STATE_NO_GAME_DATA, s_curState == APP_STATE_SET_DEFAULTS, drawFps);
 
@@ -917,7 +1040,8 @@ int main(int argc, char* argv[])
 		{
 			TFE_FRAME_END();
 		}
-	}
+		TFE_System::logWrite(LOG_MSG, "Progam Flow", "end frame");
+	}	
 
 	if (s_curGame)
 	{
@@ -949,6 +1073,7 @@ int main(int argc, char* argv[])
 	return PROGRAM_SUCCESS;
 }
 
+
 void parseOption(const char* name, const std::vector<const char*>& values, bool longName)
 {
 	if (!longName)	// short names use the same style as the originals.
@@ -962,6 +1087,11 @@ void parseOption(const char* name, const std::vector<const char*>& values, bool 
 			{
 				s_startupGame = Game_Dark_Forces;
 			}
+		}
+		else if (name[0] == 'r')
+		{
+			// -r<replay_path>
+			TFE_Input::loadReplayFromPath(&name[1]);
 		}
 		else if (strcasecmp(name, "nosound") == 0)
 		{
@@ -1001,6 +1131,14 @@ void parseOption(const char* name, const std::vector<const char*>& values, bool 
 		else if (strcasecmp(name, "skip_load_delay") == 0)
 		{
 			TFE_Settings::getTempSettings()->skipLoadDelay = true;
+		}
+		else if (strcasecmp(name, "demo_logging") == 0)
+		{
+			TFE_Settings::getTempSettings()->df_demologging = true;
+		}
+		else if (strcasecmp(name, "exit_after_replay") == 0)
+		{
+			TFE_Settings::getTempSettings()->exit_after_replay = true;
 		}
 	}
 }

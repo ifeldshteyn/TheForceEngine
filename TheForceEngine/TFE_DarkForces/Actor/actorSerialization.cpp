@@ -50,6 +50,7 @@ namespace TFE_DarkForces
 	   
 	void actorDispatch_serialize(Logic*& logic, SecObject* obj, Stream* stream)
 	{
+		
 		ActorDispatch* dispatch = nullptr;
 		if (serialization_getMode() == SMODE_WRITE)
 		{
@@ -140,6 +141,7 @@ namespace TFE_DarkForces
 			// This will be filled in a fixup pass if needed.
 			dispatch->freeTask = nullptr;
 		}
+		
 	}
 		
 	void actor_serializeObject(Stream* stream, SecObject*& obj)

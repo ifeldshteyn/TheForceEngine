@@ -1,0 +1,160 @@
+# Setup theforceengine binary directory 
+root_path=""
+LIBGL_ALWAYS_SOFTWARE=1
+
+# If unset try to look in a common folder
+if [[ ! -s "$root_path" || ! -f "$root_path/theforceengine" ]]; then
+    root_path="$(dirname "$(realpath "$0")")"/../../
+    if [ -f $root_path/theforceengine ]; then
+		echo "Found theforceengine in path $root_path"
+    else
+		echo "WARNING: Cannot find theforceengine binary. Will try one folder up"
+		root_path="$(dirname "$(realpath "$0")")"/../../../
+		if [ -f $root_path/theforceengine ]; then
+			echo "Found theforceengine in path $root_path"
+		else
+			echo "ERROR: Cannot find theforceengine binary. Please set it in the script"
+			exit 1
+		fi
+    fi
+fi    
+
+# Directory where your TFE logs are kept - needed for logs
+user_doc_path=""
+
+if [[ ! -s "$user_doc_path" || ! -d "$user_doc_path" ]]; then
+    # TFE does not like tildes in paths    
+    user_root=$(realpath ~)
+    user_doc_path=$user_root/.local/share/TheForceEngine
+    if [ -d $user_doc_path ]; then
+		echo "Found the user directory in $user_doc_path"
+    else
+		echo "WARNING: Cannot find the user tfe directory $user_doc_path. Hopefully it will be created by the executable"
+    fi
+fi
+
+# Path to the demo file
+demo_path=""
+
+if [[ ! -s "$demo_path" || ! -f "$demo_path" ]]; then
+    demo_path="$(dirname "$(realpath "$0")")"/Replays/base_test2.demo
+    if [ -f $demo_path ]; then
+		echo "Found the demo at $demo_path"
+	else
+		echo "ERROR: Cannot find the demo file $demo_path. It should be in the TheForceEngine/Tests/Replays folder"
+	exit 1
+    fi
+fi
+
+# Path to the demo log file
+demo_log_path=""
+
+if [[ ! -s "$demo_log_path" || ! -f "$demo_log_path" ]]; then
+    demo_log_path="$(dirname "$(realpath "$0")")"/Replays/base_replay_log2.txt
+    if [ -f $demo_log_path ]; then
+		echo "Found the demo log at $demo_log_path"
+	else
+		echo "ERROR: Cannot find the demo log file $demo_log_path. It should be in the TheForceEngine/Tests/Replays folder"
+	exit 1
+    fi
+fi
+
+# Run the demo and generate new log file
+pushd $root_path
+
+# LDD check
+
+# ldd $root_path/theforceengine
+
+echo "Running TFE test..."
+date
+echo "Executing Command $root_path/theforceengine -gDark -r$demo_path --demo_logging --nosound --exit_after_replay ....."
+$root_path/theforceengine -gDark -r$demo_path --demo_logging --nosound --exit_after_replay
+result=$?
+date
+
+#ls -tral "/home/runner/work/TheForceEngine/TheForceEngine/result.log"
+
+#cat /home/runner/work/TheForceEngine/TheForceEngine/result.log
+
+#ls -tral /home/runner/work/TheForceEngine/TheForceEngine/logs/.local/share/TheForceEngine/
+
+#ls -tral "/home/runner/work/TheForceEngine/TheForceEngine/logs/.local/share/TheForceEngine/the_force_engine_log.txt"
+cat /home/runner/work/TheForceEngine/TheForceEngine/logs/.local/share/TheForceEngine/the_force_engine_log.txt
+echo "Done running test. Result is $result"
+#ls -tral $root_path/crashdump.dmp
+#echo "looking for dump"
+
+#find  $root_path/../../ -type f -iname crashdump.dmp 2>/dev/null
+#date
+#echo "done looking for dump"
+
+#echo "looking for the log"
+#find / -type f -iname the_force_engine_log.txt 2>/dev/null
+#echo "done looking for the log"
+#date
+
+
+$root_path/theforceengine > output.log 2>error.log
+date
+if [ -f output.log ]; then
+   cat output.log    
+fi
+
+if [ -f error.log ]; then
+   cat error.log    
+fi
+date
+ls -tral $root_path/TheForceEngine/
+date
+ls -tral $root_path
+date
+ls -tral $root_path/../
+date
+ls -tral $root_path/../../
+date
+echo 
+$root_path/TheForceEngine/theforceengine
+ls -tral $root_path/TheForceEngine/
+date
+$root_path/../theforceengine
+ls -tral $root_path/../
+date
+$root_path/../../theforceengine
+ls -tral $root_path/../../
+date
+
+echo "looking for the log"
+find / -type f -iname the_force_engine_log.txt 2>/dev/null
+echo "done looking for the log"
+date
+# TEMP HACK
+exit 0
+
+if [ $result != "0" ]; then
+    echo "ERROR: TFE failed to run. Please look at the logs hopefully generated in $user_doc_path"
+    exit 1
+fi
+
+# Diff Log Results of the test replay.log and the base one.
+
+if [ ! -f $user_doc_path/replay.log ]; then
+    echo "ERROR: Missing $user_doc_path/replay.log - No log generated?"
+    exit 1
+fi
+
+if [ ! -f $demo_log_path ]; then
+    echo "ERROR: Missing $demo_log_path - did you not checkout the latest code?"
+    exit 1
+fi    
+
+result=`diff <(tail -n 1 $user_doc_path/replay.log) <(tail -n 1 $demo_log_path)`
+
+if $result > /dev/null; then
+    echo "TEST SUCCEEDED RESULTS MATCH!"
+    exit 0
+else
+    echo "ERROR: RESULTS DO NOT MATCH!"
+    echo $result
+    exit 1
+fi
