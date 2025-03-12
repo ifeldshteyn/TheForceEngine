@@ -68,7 +68,7 @@ pushd $root_path
 
 echo "Running TFE test..."
 date
-echo "Executing Command $root_path/theforceengine -gDark -r$demo_path --demo_logging --exit_after_replay ....."
+echo "Executing Command $root_path/theforceengine -gDark -r$demo_path --demo_logging --nosound --exit_after_replay ....."
 $root_path/theforceengine -gDark -r$demo_path --demo_logging --exit_after_replay
 result=$?
 date

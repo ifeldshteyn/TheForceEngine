@@ -753,6 +753,7 @@ int main(int argc, char* argv[])
 	TFE_System::logWrite(LOG_MSG, "Progam Flow", "The Force Engine Game Loop Started");
 	while (s_loop && !TFE_System::quitMessagePosted())
 	{
+		TFE_System::logWrite(LOG_MSG, "Progam Flow", "In Loop frame = %d", frame);
 		TFE_FRAME_BEGIN();
 		TFE_System::frameLimiter_begin();
 		bool enableRelative = TFE_Input::relativeModeEnabled();
@@ -771,10 +772,12 @@ int main(int argc, char* argv[])
 			}
 		}
 
+		TFE_System::logWrite(LOG_MSG, "Progam Flow", "sdl event");
 		// System events
 		SDL_Event event;
 		while (SDL_PollEvent(&event)) { handleEvent(event); }
 
+		TFE_System::logWrite(LOG_MSG, "Progam Flow", "inputs handling");
 		// Inputs Main Entry - skip frame any further processing during replay pause
 		if (!inputMapping_handleInputs())
 		{
@@ -782,12 +785,14 @@ int main(int argc, char* argv[])
 			inputMapping_endFrame();
 			continue;
 		}
-
+		TFE_System::logWrite(LOG_MSG, "Progam Flow", "done inputs handling");
 		// Can we save?
 		TFE_FrontEndUI::setCanSave(s_curGame ? s_curGame->canSave() : false);
 
 		// Update the System UI.
 		AppState appState = TFE_FrontEndUI::update();
+
+		TFE_System::logWrite(LOG_MSG, "Progam Flow", "appstate = %d", appState);
 		s_loadRequestFilename = TFE_SaveSystem::loadRequestFilename();
 		if (s_loadRequestFilename)
 		{
@@ -850,11 +855,12 @@ int main(int argc, char* argv[])
 			}
 		}
 
+		TFE_System::logWrite(LOG_MSG, "Progam Flow", "ui stuff");
 		if (TFE_A11Y::hasPendingFont()) { TFE_A11Y::loadPendingFont(); } // Can't load new fonts between TFE_Ui::begin() and TFE_Ui::render();
 		TFE_Ui::begin();
 		TFE_System::update();
 		TFE_ForceScript::update();
-
+		TFE_System::logWrite(LOG_MSG, "Progam Flow", "ui stuff2");
 		// Update
 		if (TFE_FrontEndUI::uiControlsEnabled() && task_canRun())
 		{
@@ -964,7 +970,7 @@ int main(int argc, char* argv[])
 				_recording = false;
 			}
 		}
-
+		TFE_System::logWrite(LOG_MSG, "Progam Flow", "console check");
 		const bool isConsoleOpen = TFE_FrontEndUI::isConsoleOpen();
 		bool endInputFrame = true;
 		if (s_curState == APP_STATE_EDITOR)
@@ -996,8 +1002,9 @@ int main(int argc, char* argv[])
 
 		bool drawFps =  s_curGame&& graphics->showFps;
 		if (s_curGame) { drawFps = drawFps && (!s_curGame->isPaused()); }
-
+		
 		TFE_FrontEndUI::setCurrentGame(s_curGame);
+		TFE_System::logWrite(LOG_MSG, "Progam Flow", "curgame set");
 		TFE_FrontEndUI::draw(s_curState == APP_STATE_MENU || s_curState == APP_STATE_NO_GAME_DATA || s_curState == APP_STATE_SET_DEFAULTS,
 			s_curState == APP_STATE_NO_GAME_DATA, s_curState == APP_STATE_SET_DEFAULTS, drawFps);
 
@@ -1033,6 +1040,7 @@ int main(int argc, char* argv[])
 		{
 			TFE_FRAME_END();
 		}
+		TFE_System::logWrite(LOG_MSG, "Progam Flow", "end frame");
 	}	
 
 	if (s_curGame)
