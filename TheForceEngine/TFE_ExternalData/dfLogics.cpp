@@ -370,6 +370,36 @@ namespace TFE_ExternalData
 			return true;
 		}
 
+		if (cJSON_IsBool(data) && strcasecmp(data->string, "officerAlerts") == 0)
+		{
+			customLogic.officerAlerts = cJSON_IsTrue(data);
+			return true;
+		}
+
+		if (cJSON_IsBool(data) && strcasecmp(data->string, "troopAlerts") == 0)
+		{
+			customLogic.troopAlerts = cJSON_IsTrue(data);
+			return true;
+		}
+
+		if (cJSON_IsNumber(data) && strcasecmp(data->string, "stepUpHeight") == 0)
+		{
+			customLogic.stepUpHeight = data->valuedouble;
+			return true;
+		}
+
+		if (cJSON_IsNumber(data) && strcasecmp(data->string, "stepDownHeight") == 0)
+		{
+			customLogic.stepDownHeight = data->valuedouble;
+			return true;
+		}
+
+		if (cJSON_IsBool(data) && strcasecmp(data->string, "slideOnCollision") == 0)
+		{
+			customLogic.slideOnCollision = cJSON_IsTrue(data) ? 1 : 0;
+			return true;
+		}
+
 		// When it comes to offsets these are considered from the perspective of the actor.
 		//
 		// Projectile spawn details guide.

@@ -193,6 +193,15 @@ namespace TFE_DarkForces
 		dispatch->fov = floatToAngle((f32)cust->fov);
 		dispatch->awareRange = FIXED(cust->awareRange);
 
+		if (cust->officerAlerts)
+		{
+			dispatch->flags |= ACTOR_OFFIC_ALERT;
+		}
+		if (cust->troopAlerts)
+		{
+			dispatch->flags |= ACTOR_TROOP_ALERT;
+		}
+
 		// Damage Module
 		DamageModule* damageMod = actor_createDamageModule(dispatch);
 		damageMod->hp = FIXED(cust->hitPoints);
@@ -253,15 +262,26 @@ namespace TFE_DarkForces
 		dispatch->moveMod = moveMod;
 		moveMod->physics.width = cust->collisionWidth < 0 ? obj->worldWidth : floatToFixed16(cust->collisionWidth);
 		moveMod->physics.height = cust->collisionHeight < 0 ? moveMod->physics.height : floatToFixed16(cust->collisionHeight);
+		moveMod->physics.stepUpHeight = floatToFixed16(cust->stepUpHeight);
+		moveMod->physics.stepDownHeight = floatToFixed16(cust->stepDownHeight);
 		
 		if (cust->isFlying)
 		{
-			moveMod->collisionFlags = (moveMod->collisionFlags & ~ACTORCOL_ALL) | ACTORCOL_BIT2;	// Remove bits 0, 1 and set bit 2
-			moveMod->physics.yPos = FIXED(200);
+			moveMod->collisionFlags = (moveMod->collisionFlags & ~ACTORCOL_ALL) | ACTORCOL_SLIDE_RESPONSE;	// Remove bits 0, 1 and set bit 2
+			moveMod->physics.stepDownHeight = FIXED(200);
 		}
 		else
 		{
 			moveMod->collisionFlags |= ACTORCOL_NO_Y_MOVE;
+		}
+
+		if (cust->slideOnCollision == 0)
+		{
+			moveMod->collisionFlags &= ~ACTORCOL_SLIDE_RESPONSE;
+		}
+		else if (cust->slideOnCollision == 1)
+		{
+			moveMod->collisionFlags |= ACTORCOL_SLIDE_RESPONSE;
 		}
 
 		dispatch->animTable = s_customAnimTable;
