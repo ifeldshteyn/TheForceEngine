@@ -77,6 +77,11 @@ namespace TFE_DarkForces
 		SERIALIZE(SaveVersionInit, dispatch->vel, {0});
 		SERIALIZE(SaveVersionInit, dispatch->lastPlayerPos, {0});
 		SERIALIZE(SaveVersionInit, dispatch->flags, 4);
+
+		// Indexes to ScriptCalls
+		SERIALIZE(ObjState_LogicScriptCallV1, dispatch->deathScriptCall, -1);
+		SERIALIZE(ObjState_LogicScriptCallV1, dispatch->alertScriptCall, -1);
+
 		// Animation Table.
 		s32 animTableIndex = -1;
 		if (serialization_getMode() == SMODE_WRITE)
@@ -186,8 +191,8 @@ namespace TFE_DarkForces
 		SERIALIZE(SaveVersionInit, colInfo->offsetX, 0);
 		SERIALIZE(SaveVersionInit, colInfo->offsetY, 0);
 		SERIALIZE(SaveVersionInit, colInfo->offsetZ, 0);
-		SERIALIZE(SaveVersionInit, colInfo->botOffset, 0);
-		SERIALIZE(SaveVersionInit, colInfo->yPos, 0);
+		SERIALIZE(SaveVersionInit, colInfo->stepUpHeight, 0);
+		SERIALIZE(SaveVersionInit, colInfo->stepDownHeight, 0);
 		SERIALIZE(SaveVersionInit, colInfo->height, 0);
 		SERIALIZE(SaveVersionInit, colInfo->u24, 0);
 		SERIALIZE(SaveVersionInit, colInfo->width, 0);

@@ -10,6 +10,7 @@
 
 #include <TFE_System/types.h>
 #include <TFE_System/iniParser.h>
+#include <TFE_Jedi/Level/rtexture.h>
 #include <TFE_FileSystem/paths.h>
 #include <TFE_Audio/midiDevice.h>
 #include "gameSourceData.h"
@@ -230,7 +231,9 @@ struct TFE_Settings_Game
 	bool df_showReplayCounter = false;  // Show the replay counter on the HUD.
 	bool df_demologging = false;        // Log the record/playback logging
 	bool df_autoEndMission = false;     // Automatically skip to the next mission
-    bool df_showKeyColors = false;      // Shows the door key color on the minimap
+  bool df_showKeyColors = false;      // Shows the door key color on the minimap
+	bool df_showMapSecrets = true;	    // Show secrets on the automap.
+	bool df_showMapObjects = true;      // Show objects on the automap.
 	s32  df_recordFrameRate = 4;        // Recording Framerate value
 	s32  df_playbackFrameRate = 2;      // Playback Framerate value
 	bool df_showKeyUsed = true; 	    // Show a message when a key is used.
@@ -384,12 +387,18 @@ static const char* modBoolOverrides[] =
 	"bryarOnly"
 };
 
+static const char* modTextureOverrides[] =
+{
+	"loadScreen",
+};
+
 struct ModSettingLevelOverride
 {
 	std::string levName;
 	std::map<std::string, int>  intOverrideMap = {};
 	std::map<std::string, float> floatOverrideMap = {};
 	std::map<std::string, bool> boolOverrideMap = {};
+	std::map<std::string, TextureData*> textureOverrideMap = {};
 };
 
 struct TFE_ModSettings
@@ -443,7 +452,7 @@ namespace TFE_Settings
 	bool jsonAiLogics();
 
 	// Settings for level mod overrides.
-	ModSettingLevelOverride getLevelOverrides(string levelName);
+	ModSettingLevelOverride* getLevelOverrides(string levelName);
 
 	bool validatePath(const char* path, const char* sentinel);
 	void autodetectGamePaths();

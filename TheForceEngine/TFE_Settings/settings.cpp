@@ -578,7 +578,9 @@ namespace TFE_Settings
 		writeKeyValue_Bool(settings, "autoNextMission", s_gameSettings.df_autoEndMission);
 		writeKeyValue_Bool(settings, "showKeyUsed", s_gameSettings.df_showKeyUsed);
 		writeKeyValue_Bool(settings, "showKeyColors", s_gameSettings.df_showKeyColors);
-		writeKeyValue_Bool(settings, "centerHudPos", s_gameSettings.df_centerHudPosition);		
+		writeKeyValue_Bool(settings, "centerHudPos", s_gameSettings.df_centerHudPosition);
+		writeKeyValue_Bool(settings, "df_showMapSecrets", s_gameSettings.df_showMapSecrets);
+		writeKeyValue_Bool(settings, "df_showMapObjects", s_gameSettings.df_showMapObjects);
 	}
 
 	void writePerGameSettings(FileStream& settings)
@@ -1256,6 +1258,18 @@ namespace TFE_Settings
 		{
 			s_gameSettings.df_centerHudPosition = parseBool(value);
 		}
+		else if (strcasecmp("df_showKeyColors", key) == 0)
+		{
+			s_gameSettings.df_showKeyColors = parseBool(value);
+		}
+		else if (strcasecmp("df_showMapSecrets", key) == 0)
+		{
+			s_gameSettings.df_showMapSecrets = parseBool(value);
+		}
+		else if (strcasecmp("df_showMapObjects", key) == 0)
+		{
+			s_gameSettings.df_showMapObjects = parseBool(value);
+		}	
 	}
 
 	void parseOutlawsSettings(const char* key, const char* value)
@@ -1455,15 +1469,15 @@ namespace TFE_Settings
 	// Mod Settings/Overrides.
 	//////////////////////////////////////////////////
 
-	ModSettingLevelOverride getLevelOverrides(string levelName)
+	ModSettingLevelOverride* getLevelOverrides(string levelName)
 	{
 		string lowerLevel = TFE_A11Y::toLower(levelName);
 		if (s_modSettings.levelOverrides.find(lowerLevel) != s_modSettings.levelOverrides.end())
 		{
-			return s_modSettings.levelOverrides[lowerLevel];
+			return &s_modSettings.levelOverrides[lowerLevel];
 		}
-		ModSettingLevelOverride empty;
-		return empty;
+		
+		return nullptr;
 	}
 
 	ModSettingOverride parseJSonBoolToOverride(const cJSON* item)
@@ -1523,6 +1537,22 @@ namespace TFE_Settings
 		}
 		return value;
 	};
+
+	TextureData* parseTextureOverride(const cJSON* item)
+	{
+		TextureData* tex = nullptr;
+		if (cJSON_IsString(item))
+		{
+			char* filename = item->valuestring;
+			tex = bitmap_load(filename, 1, POOL_GAME);
+		}
+		else
+		{
+			TFE_System::logWrite(LOG_WARNING, "MOD_CONF", "Override '%s' is an invalid type and should be a filename (string). Ignoring override.", item->string);
+		}
+
+		return tex;
+	}
 
 	void parseTfeOverride(TFE_ModSettings* modSettings, const cJSON* tfeOverride)
 	{
@@ -1645,9 +1675,24 @@ namespace TFE_Settings
 
 							// Check if it is an bool-type override
 							int boolArraySize = sizeof(modBoolOverrides) / sizeof(modBoolOverrides[0]);
+							bool isBoolParam = false;
 							for (int i = 0; i < boolArraySize; ++i) {
 								if (strcmp(modBoolOverrides[i], overrideName) == 0) {
 									levelOverride.boolOverrideMap[overrideName] = parseJSonBoolToOverride(levelOverrideIter) == MSO_TRUE ? JTRUE : JFALSE;
+									isBoolParam = true;
+									break;
+								}
+							}
+
+							if (isBoolParam) { continue; }
+
+							// Texture override
+							int assetArraySize = sizeof(modTextureOverrides) / sizeof(modTextureOverrides[0]);
+							for (int i = 0; i < assetArraySize; i++)
+							{
+								if (strcmp(modTextureOverrides[i], overrideName) == 0)
+								{
+									levelOverride.textureOverrideMap[overrideName] = parseTextureOverride(levelOverrideIter);
 									break;
 								}
 							}

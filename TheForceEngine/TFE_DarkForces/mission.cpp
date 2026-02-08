@@ -54,6 +54,7 @@ namespace TFE_DarkForces
 	JBool s_canTeleport = JTRUE;
 	GameMissionMode s_missionMode = MISSION_MODE_MAIN;
 
+	TextureData* s_defaultLoadScreen = nullptr;
 	TextureData* s_loadScreen = nullptr;
 	u8 s_loadingScreenPal[768];
 	u8 s_levelPalette[768];
@@ -737,6 +738,25 @@ namespace TFE_DarkForces
 				
 	void blitLoadingScreen()
 	{
+		// Moddable loading screen
+		const char* levelName = agent_getLevelName();
+		ModSettingLevelOverride* modLevelOverride = TFE_Settings::getLevelOverrides(levelName);
+		if (modLevelOverride && !modLevelOverride->levName.empty())
+		{
+			if (modLevelOverride->textureOverrideMap["loadScreen"])
+			{
+				s_loadScreen = modLevelOverride->textureOverrideMap["loadScreen"];
+			}
+			else
+			{
+				s_loadScreen = s_defaultLoadScreen;
+			}
+		}
+		else
+		{
+			s_loadScreen = s_defaultLoadScreen;
+		}
+		
 		if (!s_loadScreen) { return; }
 		blitTextureToScreen(s_loadScreen, (DrawRect*)vfb_getScreenRect(VFB_RECT_UI), 0/*x0*/, 0/*y0*/, s_framebuffer, JFALSE, JTRUE);
 	}

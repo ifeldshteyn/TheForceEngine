@@ -1267,6 +1267,17 @@ namespace TFE_FrontEndUI
 			gameSettings->df_showKeyUsed = showKeysUsed;
 		}
 
+		bool showMapSecrets = gameSettings->df_showMapSecrets;
+		if (ImGui::Checkbox("Show Secrets on the AutoMap", &showMapSecrets))
+		{
+			gameSettings->df_showMapSecrets = showMapSecrets;
+		}
+
+		bool showMapObjects = gameSettings->df_showMapObjects;
+		if (ImGui::Checkbox("Show Objects on the AutoMap", &showMapObjects))
+		{
+			gameSettings->df_showMapObjects = showMapObjects;
+		}
 
 		ImGui::Separator();
 

@@ -194,6 +194,9 @@ namespace TFE_DarkForces
 		dispatch->freeTask = nullptr;
 		dispatch->flags = ACTOR_NPC;	// this is later removed for barrels and scenery
 
+		dispatch->deathScriptCall = -1;
+		dispatch->alertScriptCall = -1;
+
 		if (obj)
 		{
 			obj_addLogic(obj, (Logic*)dispatch, LOGIC_DISPATCH, s_istate.actorTask, actorLogicCleanupFunc);
@@ -439,9 +442,9 @@ namespace TFE_DarkForces
 		{
 			angle14_32 rAngle = moveMod->physics.responseAngle + (s_curTick & 0xff) - 128;
 			angle14_32 angleDiff = getAngleDifference(obj->yaw, rAngle) & 8191;
-			if (angleDiff > 4095)
+			if (angleDiff > 4095) // 90 degrees
 			{
-				newAngle = moveMod->physics.responseAngle - 8191;
+				newAngle = moveMod->physics.responseAngle - 8191;  // 180 degrees
 			}
 			else
 			{
@@ -614,6 +617,8 @@ namespace TFE_DarkForces
 			}
 			spawnHitEffect(damageMod->dieEffect, sector, obj->posWS, obj);
 
+			s32 corpseId = -1;	// corpseId to be passed to a deathscriptcall
+
 			// If the secHeight is <= 0, then it is not a water sector.
 			if (sector->secHeight - 1 < 0)
 			{
@@ -627,7 +632,7 @@ namespace TFE_DarkForces
 					{
 						item,	// obj
 						FIXED(2), 0, FIXED(2),	// offset
-						ONE_16, COL_INFINITY, ONE_16, 0,	// botOffset, yPos, height, u1c
+						ONE_16, COL_INFINITY, ONE_16, 0,	// stepUpHeight, stepDownHeight, height, u1c
 						nullptr, 0, nullptr,
 						item->worldWidth, 0,
 						JFALSE,
@@ -664,9 +669,24 @@ namespace TFE_DarkForces
 					corpse->entityFlags |= ETFLAG_CORPSE;
 					sector_addObject(obj->sector, corpse);
 
-					obj_addToRefList(corpse, ObjRefType_Corpse);	// scripting
+					corpseId = obj_addToRefList(corpse, ObjRefType_Corpse);	// scripting
 				}
 			}
+
+			// TFE - call deathscript, add corpse's ObjectId as the final arg
+			s32 scriptCallIndex = ((ActorDispatch*)s_actorState.curLogic)->deathScriptCall;
+			if (scriptCallIndex >= 0)
+			{
+				LogicScriptCall* scriptCall = logic_getScriptCall(scriptCallIndex);
+				if (scriptCall && scriptCall->funcPtr)
+				{
+					scriptCall->args[scriptCall->argCount].type = TFE_ForceScript::ARG_S32;
+					scriptCall->args[scriptCall->argCount].iValue = corpseId;
+					scriptCall->argCount++;
+					TFE_ForceScript::execFunc(scriptCall->funcPtr, scriptCall->argCount, scriptCall->args);
+				}
+			}
+
 			actor_kill();
 			return 0;
 		}
@@ -1407,6 +1427,7 @@ namespace TFE_DarkForces
 		vec3_fixed desiredMove = { 0, 0, 0 };
 		vec3_fixed move = { 0, 0, 0 };
 
+		// First, handle active movement - movement that the actor "intends" to do
 		moveMod->collisionWall = nullptr;
 		if (!(moveMod->target.flags & TARGET_FREEZE))
 		{
@@ -1474,11 +1495,11 @@ namespace TFE_DarkForces
 					RSector* triggerSector = (nextSector) ? nextSector : wall->sector;
 					if (obj->entityFlags & ETFLAG_SMART_OBJ)
 					{
-						message_sendToSector(triggerSector, obj, 0, MSG_TRIGGER);
+						message_sendToSector(triggerSector, obj, 0, MSG_TRIGGER);   // smart object will try to open a door or activate an elevator that it collides with
 					}
 				}
 				// Handles a single collision response + resolution step.
-				if (moveMod->collisionFlags & ACTORCOL_BIT2)
+				if (moveMod->collisionFlags & ACTORCOL_SLIDE_RESPONSE)
 				{
 					moveMod->collisionWall = wall;
 					dirX = physics->responseDir.x;
@@ -1489,17 +1510,18 @@ namespace TFE_DarkForces
 			}
 		}
 
+		// Now handle passive movement - movement caused by being pushed, eg. by explosions or projectile impacts
 		// Apply the per-frame delta computed from the actor's velocity.
 		if (moveMod->delta.x | moveMod->delta.z)
 		{
-			physics->flags |= 1;
+			physics->flags |= COLINFO_INFINITE_DROP;  // actor can be pushed off a cliff
 			physics->offsetX = moveMod->delta.x;
 			physics->offsetY = 0;
 			physics->offsetZ = moveMod->delta.z;
 			handleCollision(physics);
 
 			// Handles a single collision response + resolution step from velocity delta.
-			if ((moveMod->collisionFlags & ACTORCOL_BIT2) && physics->responseStep)
+			if ((moveMod->collisionFlags & ACTORCOL_SLIDE_RESPONSE) && physics->responseStep)
 			{
 				moveMod->collisionWall = physics->wall;
 				dirX = physics->responseDir.x;
@@ -1629,8 +1651,8 @@ namespace TFE_DarkForces
 	{
 		SecObject* obj = moveMod->header.obj;
 
-		moveMod->physics.botOffset = 0x38000;	// 3.5
-		moveMod->physics.yPos = FIXED(4);
+		moveMod->physics.stepUpHeight = 0x38000;	// 3.5 units
+		moveMod->physics.stepDownHeight = FIXED(4); // 4 units
 		moveMod->physics.height = obj->worldHeight;
 		moveMod->physics.width = obj->worldWidth;
 		moveMod->physics.responseStep = JFALSE;
@@ -1642,7 +1664,7 @@ namespace TFE_DarkForces
 		moveMod->collisionWall = nullptr;
 		moveMod->unused = 0;
 
-		moveMod->collisionFlags = (moveMod->collisionFlags | (ACTORCOL_NO_Y_MOVE | ACTORCOL_GRAVITY)) & ~ACTORCOL_BIT2;	// Set bits 0, 1 and clear bit 2. This creates a non-flying AI by default.
+		moveMod->collisionFlags = (moveMod->collisionFlags | (ACTORCOL_NO_Y_MOVE | ACTORCOL_GRAVITY)) & ~ACTORCOL_SLIDE_RESPONSE;	// Set bits 0, 1 and clear bit 2. This creates a non-flying AI by default.
 		obj->entityFlags |= ETFLAG_SMART_OBJ;
 	}
 
@@ -1993,7 +2015,7 @@ namespace TFE_DarkForces
 					{
 						dispatch->alertSndID = sound_playCued(s_officerAlertSndSrc[s_actorState.officerAlertIndex], obj->posWS);
 						s_actorState.officerAlertIndex++;
-						if (s_actorState.officerAlertIndex >= 4)
+						if (s_actorState.officerAlertIndex >= OFFICER_ALERT_COUNT)
 						{
 							s_actorState.officerAlertIndex = 0;
 						}
@@ -2002,7 +2024,7 @@ namespace TFE_DarkForces
 					{
 						dispatch->alertSndID = sound_playCued(s_stormAlertSndSrc[s_actorState.stormtrooperAlertIndex], obj->posWS);
 						s_actorState.stormtrooperAlertIndex++;
-						if (s_actorState.stormtrooperAlertIndex >= 8)
+						if (s_actorState.stormtrooperAlertIndex >= STORM_ALERT_COUNT)
 						{
 							s_actorState.stormtrooperAlertIndex = 0;
 						}
@@ -2014,6 +2036,19 @@ namespace TFE_DarkForces
 					s_actorState.nextAlertTick = s_curTick + 291;	// ~2 seconds between alerts
 				}
 				dispatch->flags &= ~ACTOR_IDLE;		// remove flag bit 0 (ACTOR_IDLE)
+
+				// TFE - call alertscript, add the ObjectId as the final arg
+				if (dispatch->alertScriptCall >= 0)
+				{
+					LogicScriptCall* scriptCall = logic_getScriptCall(dispatch->alertScriptCall);
+					if (scriptCall && scriptCall->funcPtr)
+					{
+						scriptCall->args[scriptCall->argCount].type = TFE_ForceScript::ARG_S32;
+						scriptCall->args[scriptCall->argCount].iValue = obj_getRefIndex(obj);
+						scriptCall->argCount++;
+						TFE_ForceScript::execFunc(scriptCall->funcPtr, scriptCall->argCount, scriptCall->args);
+					}
+				}
 			}
 		}
 		else if (msg == MSG_DAMAGE || msg == MSG_EXPLOSION)
@@ -2021,6 +2056,19 @@ namespace TFE_DarkForces
 			if (dispatch->flags & ACTOR_IDLE)
 			{
 				gameMusic_startFight();
+
+				// TFE - call alertscript, add the ObjectId as the final arg
+				if (dispatch->alertScriptCall >= 0)
+				{
+					LogicScriptCall* scriptCall = logic_getScriptCall(dispatch->alertScriptCall);
+					if (scriptCall && scriptCall->funcPtr)
+					{
+						scriptCall->args[scriptCall->argCount].type = TFE_ForceScript::ARG_S32;
+						scriptCall->args[scriptCall->argCount].iValue = obj_getRefIndex(obj);
+						scriptCall->argCount++;
+						TFE_ForceScript::execFunc(scriptCall->funcPtr, scriptCall->argCount, scriptCall->args);
+					}
+				}
 			}
 			dispatch->flags &= ~ACTOR_IDLE;
 			s_actorState.curAnimation = nullptr;

@@ -1473,7 +1473,8 @@ namespace TFE_DarkForces
 		renderer_setVisionEffect(0);
 		renderer_setupCameraLight(JFALSE, JFALSE);
 
-		s_loadScreen = bitmap_load("wait.bm", 1, POOL_GAME);
+		s_defaultLoadScreen = bitmap_load("wait.bm", 1, POOL_GAME);  // allow load screen to be moddable; the default will remain wait.bm
+		s_loadScreen = s_defaultLoadScreen;
 		if (TFE_Paths::getFilePath("wait.pal", &filePath))
 		{
 			FileStream::readContents(&filePath, s_loadingScreenPal, 768);
@@ -1619,9 +1620,10 @@ namespace TFE_DarkForces
 		TFE_ForceScript::serialize(stream);
 		if (!writeState)
 		{
-			// Setup the level script after script serialization and fixup INF function pointers.
+			// Setup the level script after script serialization and fixup ScriptCall function pointers.
 			loadLevelScript();
 			inf_fixupScriptCalls();
+			logic_fixupScriptCalls();
 		}
 
 		TFE_System::messages_serialize(stream);

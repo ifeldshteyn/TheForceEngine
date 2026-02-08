@@ -87,3 +87,4 @@ TheForceEngine/tfelnx
 
 # ignore recipe
 *.recipe
+.DS_Store
